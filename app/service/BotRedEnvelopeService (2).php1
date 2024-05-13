@@ -1,0 +1,231 @@
+<?php
+
+namespace app\service;
+
+use app\facade\BotFacade;
+use app\model\LotteryJoinModel;
+use app\model\LotteryJoinUserModel;
+use app\model\MoneyLogModel;
+use app\model\UserModel;
+use app\traits\RedBotTrait;
+use app\traits\TelegramTrait;
+use think\facade\Db;
+
+class BotJieLongRedEnvelopeService extends BaseService
+{
+
+    use TelegramTrait;
+    use RedBotTrait;
+
+    //接龙红包创建，不是 倒霉蛋发送
+    public function createSend(string $crowd, float $money, int $joinNum, string $userId, string $tgId, $startAt, string $people, int $expireAt = 0)
+    {
+        // $tgId,$crowd,$userId $money $joinNum  $expireAt  $startAt
+        $expireAt = $expireAt > 0 ? $expireAt : 600;  //默认10分钟停止
+        empty($startAt) && $startAt = date('Y-m-d H:i:s');
+        $waterMoney = $money * config('telegram.bot-binding-red-service-charge');//发红包收取的利息
+        $money = $money + $waterMoney;
+        $insert = [
+            'tg_id' => $tgId,
+            'crowd' => $crowd,
+            'user_id' => $userId,
+            'status' => LotteryJoinModel::STATUS_HAVE,
+            'activity_on' => getRedEnvelopeOn(20,'-1'),
+            'money' => $money,
+            'water_money' => $waterMoney,
+            'join_num' => $joinNum,
+            'to_join_num' => 0,
+            'expire_at' => $expireAt,
+            'start_at' => $startAt,
+            'in_join_user' => '',
+            'lottery_type' => LotteryJoinModel::RED_TYPE_JL,
+            'jl_number' => 1
+        ];
+
+        if (!empty($people)) {
+            $insert['in_join_user'] = $people;
+        }
+        //判断用户钱包钱是否足够
+        if ($userId <= 0) {
+            return fail([], '发送用户ID不存在');
+        }
+        //查询用户的余额是否足够
+        $userInfo = UserModel::getInstance()->getDataOne(['id' => $userId]);
+        if (empty($userInfo)) {
+            return fail([], '用户不存在');
+        }
+        $toMoney = $userInfo['money'] - $money;
+        if ($toMoney < 0) {
+            return fail([], '用户余额不足');
+        }
+
+        $insert['user_start_money'] = $userInfo['money'];
+        $insert['user_end_money'] = $toMoney;
+
+        Db::startTrans();
+        try {
+            LotteryJoinModel::getInstance()->setInsert($insert);
+            UserModel::getInstance()->setUpdate(['id' => $userId], ['money' => $toMoney]);
+            //写入日志
+            MoneyLogModel::getInstance()->setInsert([]);
+            // 提交事务
+            Db::commit();
+        } catch (\Exception $e) {
+            // 回滚事务
+            Db::rollback();
+            traceLog($e->getError(), 'jl-createSend-error');
+            return false;
+        }
+
+        //确认信息
+        //调用用户点击发送方法 可直接发送
+        return true;
+    }
+
+    //用户点击发送按钮
+    //点击发送按钮。发送红包消息
+    public function setSend($redId)
+    {
+        //验证红包信息和红包发送时间
+        list($redInfo, $photoUrl) = $this->verifySetSend($redId);
+        try {
+            //获取标签列表
+            $list = $this->sendRrdBotRoot($redInfo['join_num'], 0, $redId);
+            //发送消息到 telegram 开始抽奖
+            $res = BotFacade::sendPhoto($redInfo['crowd'], $photoUrl, $this->copywriting($redInfo['money'], $redInfo['in_join_user']), $list);
+            if (!$res) {
+                traceLog($res, 'jielong-red-sendStartBotRoot-curl-error');
+                throw new \think\exception\HttpException(404, 'curl 失败');
+            }
+            $request = json_decode($res, true);
+            //修改红包数据
+            LotteryJoinModel::getInstance()->setUpdate(['id' => $redInfo['id']], ['message_id' => $request['result']['message_id'], 'status' => LotteryJoinModel::STATUS_START]);
+        } catch (\Exception $e) {
+            return fail([], $e->getMessage());
+        }
+        //发送成功。，写入 接龙红包使用 redis 信息
+        $this->botRedStartSendOrUserEndData();
+        return success();
+    }
+
+    //倒霉蛋发红包。
+    public function haplessUserSetSend($insert = [],$lotteryJoinUserUpdate = [], $lotteryJoinUpdate = [])
+    {
+        //倒霉蛋发红包， 1 创建发红包信息 2 扣除用户押金  3 更改发送红包的信息， 2 发送通知
+        Db::startTrans();
+        try {
+            //1 创建发红包信息
+            LotteryJoinModel::getInstance()->setInsert($insert);
+            LotteryJoinModel::getInstance()->updateOne($lotteryJoinUpdate);
+            LotteryJoinUserModel::getInstance()->updateOne($lotteryJoinUserUpdate);
+            //同一个红包。如果倒霉蛋选出来。其他用户的日志要变更，并通过任务返回用户的金额
+            LotteryJoinUserModel::getInstance()->updateStatusDeposit($lotteryJoinUserUpdate['id'],$lotteryJoinUpdate['id']);
+            //写入日志
+
+            // 提交事务
+            Db::commit();
+        } catch (\Exception $e) {
+            // 回滚事务
+            Db::rollback();
+            return false;
+        }
+        return true;
+
+    }
+
+
+    //机器人消息体解析 $command 消息命令  $messageId 消息ID  $crowd群号 $tgId领取用户的tgId
+    public function getRedBotAnalysis($command, $messageId, $crowd, $tgId, $callbackQueryId, $tgUser = [])
+    {
+        //拆卸红包命令
+        list($redId) = $this->disassembleCommand($command);
+        //验证用户信息是否存在
+        list($userInfo) = $this->verifyUserData($tgId, $tgUser);
+
+        //用户参与结算
+        return $this->getRedEnvelopeUser($tgId, $redId, $callbackQueryId, $userInfo);
+    }
+
+    public function getRedEnvelopeUser($tgId, $redId, $callbackQueryId, $userInfo)
+    {
+
+        $this->repeatPost();//防止重复请求
+        //验证红包领取信息
+        list($dataOne, $activityOn, $toMoney, $toJoinNum) = $this->verifyRedQualification($redId, $callbackQueryId);
+
+        //1 判断用户是否已经领取了 后期可改redis
+        $this->userIsReceive($tgId, $redId, $activityOn, $callbackQueryId);
+
+        //抢红包需要押金，判断用户是否金额足够
+        //本次需要扣除的押金和水钱
+        $depositMoney = $dataOne['money'] + $dataOne['water_money'];
+        if ($dataOne == LotteryJoinModel::IS__STATUS_END_JL) {
+            $this->verifyUserBalance($userInfo['balance'], $depositMoney, $callbackQueryId);
+        }
+
+        //2 计算用户可以领取到多少金额
+        $amount = $this->grabNextRedPack($toMoney, $toJoinNum);
+        traceLog("红包ID {$redId} 用户 {$tgId} 领取金额{$amount}");
+
+        //3 计算已经领取的金额和已经领取了多少人
+        $stopMoney = $amount + $dataOne['to_money'];//总领取了多少金额
+        $stopJoinNum = $dataOne['to_join_num'] ++;//总领取了多少人 +1
+
+        //###组装修改的红包信息###如果是最后一个用户参数抽奖了。抽奖状态变更为已结束
+        $lotteryUpdate = ['to_money' => $stopMoney, 'to_join_num' => $stopJoinNum, 'join_user' => $dataOne['join_user'] . $userInfo['id'] . ','];
+
+        $status = 1;
+        if ($toJoinNum <= 1) {
+            $status = LotteryJoinModel::STATUS_END;
+            $lotteryUpdate['status'] = LotteryJoinModel::STATUS_END;
+        }
+
+        //####组装写入 领取红包的信息
+        $lotteryJoinUserInsert = [
+            'user_id' => $userInfo['id'],
+            'tg_id' => $tgId,
+            'activity_on' => $activityOn,
+            'lottery_id' => $redId,
+            'to_money' => $stopMoney,
+            'money' => $amount,
+            'user_name' => $userInfo['username'],
+            'user_start_money' => $userInfo['money'],
+            'user_end_money' => $userInfo['money'] + $amount,
+            'user_deposit_money' => $depositMoney,
+            'user_still_money' => 0,
+            'lottery_type' => $dataOne['lottery_type'],
+        ];
+
+        //用户抢红包需要扣除押金，抢完过后选一个用户作为 倒霉蛋，通过倒霉蛋继续发红包
+        Db::startTrans();
+        try {
+            //1 更改红包信息
+            LotteryJoinModel::getInstance()->setUpdate(['id' => $redId, 'activity_on' => $activityOn], $lotteryUpdate);
+            //2 写入红包领取信息
+            LotteryJoinUserModel::getInstance()->setInsert($lotteryJoinUserInsert);
+            //3 写入用户领取金额日志
+
+            MoneyLogModel::getInstance()->setInsert([]);
+            //2 执行修改用户钱包
+            UserModel::where('id', $userInfo['id'])->inc('balance', $amount)->update();
+            //更新消息体 内联键盘
+            $list = $this->sendRrdBotRoot($dataOne['join_num'], $lotteryUpdate['to_join_num'], $redId);
+
+            //是否需要发送信息时 用户领取了多少U 也显示
+            $false = $status == LotteryJoinModel::STATUS_END;
+            BotFacade::editMessageCaption($dataOne['crowd'],$dataOne['message_id'],$this->queryPhotoEdit($dataOne['money'],$amount,$redId,$userInfo,$false),$list);
+        } catch (\Exception $e) {
+            Db::rollback();
+            traceLog($e->getMessage(), "接龙用户抢红包 {$redId} 结算错误");
+            // 处理异常或返回错误
+            return 0;
+        }
+
+        //选完倒霉蛋之后，返回其他用户的押金  计划任务选取
+
+        //用户领取信息写入
+        $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate);
+        $this->botRedStartSendOrUserEndData();//用户领取接龙红包信息更新redis ttl
+        return true;
+    }
+}
