@@ -29,6 +29,7 @@ class BotRedSendService extends BaseService
         isset($get['hash']) && $tgUser['hash'] = $get['hash'];
         try {
             $auth_data = $this->checkTelegramAuthorization($tgUser);
+            isset($get['crowd']) && $auth_data['crowd'] = $get['crowd'];
             $this->saveTelegramUserData($auth_data);
         } catch (Exception $e) {
             traceLog($e->getMessage());
@@ -38,9 +39,9 @@ class BotRedSendService extends BaseService
     }
 
     //获取tg用户账号
-    public function getUserInfo()
+    public function getUserInfo($tgId)
     {
-        $user = $this->getTgUser();
+        $user = $this->getTgUser($tgId);
         if (empty($user)){
             return [];
         }

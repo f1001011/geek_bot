@@ -16,18 +16,22 @@ class Index extends ApiBase
     public function index()
     {
 
-        $get = $this->request->get();
-        $yes = BotRedSendService::getInstance()->verifyUser($get);
-        if (!$yes){
-            echo '没注册平台';
-            return ;
-        }
-
-        //获取是否注册了平台 和用户信息
-        $userInfo = BotRedSendService::getInstance()->getUserInfo();
-        dump($userInfo->toArray());
-        die;
-
+//        $key = 'sadewqewesdq12331234231111111111111111111111111111111111111111';
+//       $b=  decryptToken(21563351653211);
+//        dump($b);
+//        die;
+//        $get = $this->request->get();
+//        $yes = BotRedSendService::getInstance()->verifyUser($get);
+//        if (!$yes){
+//            echo '没注册平台';
+//            return ;
+//        }
+//
+//        //获取是否注册了平台 和用户信息
+//        $userInfo = BotRedSendService::getInstance()->getUserInfo();
+//        dump($userInfo->toArray());
+//        die;
+//
 
 
 

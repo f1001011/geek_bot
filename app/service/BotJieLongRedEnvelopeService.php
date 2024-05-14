@@ -115,7 +115,7 @@ class BotJieLongRedEnvelopeService extends BaseService
 
         try {
             //获取标签列表
-            $list = $this->sendRrdBotRoot($redInfo['join_num'], 0, $redId);
+            $list = $this->sendRrdBotRoot($redInfo['join_num'], 0, $redId,$redInfo['crowd']);
             //发送消息到 telegram 开始抽奖
             $res = BotFacade::sendPhoto($redInfo['crowd'], $photoUrl,
                 $this->jlCopywriting($redInfo['money'], bcdiv($redInfo['water_money'], $redInfo['money'], 4), $redInfo['join_num'],$redInfo['username']),
@@ -263,7 +263,7 @@ class BotJieLongRedEnvelopeService extends BaseService
             //2 执行修改用户钱包
             UserModel::getInstance()->dec($userInfo['id'], $yinMoney);
             //更新消息体 内联键盘
-            $list = $this->sendRrdBotRoot($dataOne['join_num'], $lotteryUpdate['to_join_num'], $redId);
+            $list = $this->sendRrdBotRoot($dataOne['join_num'], $lotteryUpdate['to_join_num'], $redId,$dataOne['crowd']);
 
             //是否需要发送信息时 用户领取了多少U 也显示
             $false = $status == LotteryJoinModel::STATUS_END;

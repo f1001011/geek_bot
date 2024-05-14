@@ -66,7 +66,7 @@ trait RedBotTrait
             ];
             $userId = UserModel::getInstance()->setInsert($userInfo);
             $userInfo['id'] = $userId;
-            return fail([], '用户信息不存在--正在插入');
+            return [$userInfo];
         }
         return [$userInfo];
     }
@@ -127,7 +127,7 @@ trait RedBotTrait
     protected function redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdateData)
     {
         //写入已经领取的用户
-        Cache::SADD(sprintf(CacheKey::REDIS_TELEGRAM_RED_RECEIVE_USER, $redId), json_encode(['user_id' => $userInfo['id'], 'money' => $amount, 'user_name' => $userInfo['username']]));
+        Cache::SADD(sprintf(CacheKey::REDIS_TELEGRAM_RED_RECEIVE_USER, $redId), json_encode(['user_id' => $userInfo['id'], 'money' => $amount, 'user_name' => $userInfo['username']]),CacheKey::REDIS_TELEGRAM_RED_RECEIVE_USER_TTL);
         //写入抽奖结束信息
         if (isset($lotteryUpdateData['status']) && $lotteryUpdateData['status'] != 1) {
             Cache::set(sprintf(CacheKey::REDIS_TELEGRAM_RED_END, $redId), $redId, CacheKey::REDIS_TELEGRAM_RED_END_TTL);

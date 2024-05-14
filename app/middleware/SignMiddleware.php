@@ -3,7 +3,10 @@ declare (strict_types = 1);
 
 namespace app\middleware;
 
+use app\common\CacheKey;
 use app\common\CodeName;
+use think\Exception;
+use think\facade\Cache;
 
 class SignMiddleware
 {
@@ -12,14 +15,23 @@ class SignMiddleware
      *
      * @param \think\Request $request
      * @param \Closure       $next
-     * @return Response
      */
     public function handle($request, \Closure $next)
     {
-        if ($request->param('sign') != 'sign') {
-             fail([],language('sign error'),CodeName::SIGN_ERROR);
+        $sign = $request->header('sign');
+        if (empty($sign)){
+            fail([],language('sign error'),CodeName::SIGN_ERROR);
+        }
+        $data = decryptToken($sign);
+        //获取redis sign
+        //储存到 redis
+        $jsonUser = Cache::get(sprintf(CacheKey::REDIS_TG_USER_INFO,$data['tg_id']));
+        if (empty($jsonUser)){
+            fail([],language('sign error'),CodeName::SIGN_ERROR);
         }
 
+        //用户信息
+        $request->user_info  = json_decode($jsonUser,true);
         return $next($request);
     }
     public function end(\think\Response $response)

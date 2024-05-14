@@ -1,24 +1,24 @@
 <?php
 // 应用公共文件
 
-function success(array $data = [],$message = 'message', int $code = 200)
+function success(array $data = [], $message = 'message', int $code = 200)
 {
-    echo json_encode(['data' => $data,'message'=>$message, 'code' => $code]);
+    echo json_encode(['data' => $data, 'message' => $message, 'code' => $code]);
     die;
 }
 
-function fail(array $data = [],$message = 'message', int $code = 500)
+function fail(array $data = [], $message = 'message', int $code = 500)
 {
-    echo json_encode(['data' => $data,'message'=>$message, 'code' => $code]);
+    echo json_encode(['data' => $data, 'message' => $message, 'code' => $code]);
     die;
 }
 
-function language(string $name = '',...$values)
+function language(string $name = '', ...$values)
 {
-    if (empty($values)){
+    if (empty($values)) {
         return lang($name);
     }
-    return  sprintf(lang($name),...$values);
+    return sprintf(lang($name), ...$values);
 }
 
 function curlPost(string $url, array $post_data = [], $type = 'http_build_query', $header = [])
@@ -57,7 +57,7 @@ function curlPost(string $url, array $post_data = [], $type = 'http_build_query'
     return $data;
 }
 
-function getRedEnvelopeOn(int $length = 20,$string = ''): string
+function getRedEnvelopeOn(int $length = 20, $string = ''): string
 {
     //随机字符集
     $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -66,17 +66,21 @@ function getRedEnvelopeOn(int $length = 20,$string = ''): string
         $on .= $chars[mt_rand(0, strlen($chars) - 1)];
     }
     $date = date('YmdHis');
-    return $on.$date.$string;
+    return $on . $date . $string;
 }
 
-function traceLog($message,$lv=''){
-    trace($message,$lv.'-RESPONSE_ID:'.REQUEST_ID);
+function traceLog($message, $lv = '')
+{
+    trace($message, $lv . '-RESPONSE_ID:' . REQUEST_ID);
 }
-function traceLogs($message,$lv = 'info',$channel = 'job'){
+
+function traceLogs($message, $lv = 'info', $channel = 'job')
+{
     \think\facade\Log::channel($channel)->$lv($message);
 }
 
-function hashSha($auth_data){
+function hashSha($auth_data)
+{
     $token = '';//密钥
     $check_hash = $auth_data['hash'];
     unset($auth_data['hash']);
@@ -86,7 +90,7 @@ function hashSha($auth_data){
     }
     sort($data_check_arr);
     $data_check_string = implode("", $data_check_arr);
-    $secret_key = hash('sha256',$token , true);
+    $secret_key = hash('sha256', $token, true);
     $hash = hash_hmac('sha256', $data_check_string, $secret_key);
     if (strcmp($hash, $check_hash) !== 0) {
         throw new Exception('Data is NOT from Telegram');
@@ -97,7 +101,8 @@ function hashSha($auth_data){
     return $auth_data;
 }
 
-function getCookie($name = ''){
+function getCookie($name = '')
+{
     return $_COOKIE[$name];
 }
 
@@ -110,4 +115,48 @@ function createGuid(): string
         . substr($char_id, 12, 4) . $hyphen
         . substr($char_id, 16, 4) . $hyphen
         . substr($char_id, 20, 12);
+}
+
+//生成token
+function generateToken($data, $secretKey = '')
+{
+    $secretKey = config('app.user-secret-key');
+    // 验证数据
+    if (!is_array($data) || empty($secretKey)) {
+        return false;
+    }
+    // 序列化数据
+    $serializedData = json_encode($data);
+    // 创建一个签名，这里使用了 HMAC-SHA256
+    $signature = hash_hmac('sha256', $serializedData, $secretKey, true);
+    // 将签名附加到数据上
+    $tokenData = $serializedData . '.' . base64_encode($signature);
+    // 对 token 进行 base64 编码以便于存储和传输
+    $encodedToken = base64_encode($tokenData);
+
+    return $encodedToken;
+}
+
+//解密token
+function decryptToken($encodedToken, $secretKey = '')
+{
+    try {
+        $secretKey = config('app.user-secret-key');
+        // 解码 token
+        $tokenData = base64_decode($encodedToken);
+        // 分割数据和签名
+        list($serializedData, $signatureBase64) = explode('.', $tokenData, 2);
+        // 解码签名
+        $signature = base64_decode($signatureBase64);
+        // 验证签名
+        $expectedSignature = hash_hmac('sha256', $serializedData, $secretKey, true);
+        if (!hash_equals($signature, $expectedSignature)) {
+            return false; // 签名不匹配，token 无效
+        }
+        // 解码数据
+        $data = json_decode($serializedData, true);
+    } catch (Exception $e) {
+        fail([],language('sign error'));
+    }
+    return $data;
 }

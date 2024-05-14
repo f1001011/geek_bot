@@ -24,10 +24,10 @@ return [
         'redis'    => [
             'type'       => 'redis',
             'queue'      => 'default',
-            'host'       =>  env('REDIS_HOST', '127.0.0.1'),
+            'host'       =>  env('redis.redis_host', '127.0.0.1'),
             'port'       => 6379,
-            'password'   =>  env('REDIS_PASSWORD', ''),
-            'select'     => 3,
+            'password'   =>  env('redis.redis_password', ''),
+            'select'     => env('redis.redis_select', 3),
             'timeout'    => 0,
             'persistent' => false,
             'prefix'     => 'think:queue:',

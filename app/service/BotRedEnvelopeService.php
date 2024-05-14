@@ -113,7 +113,7 @@ class BotRedEnvelopeService extends BaseService
         }
         try {
             //获取标签列表
-            $list = $this->sendRrdBotRoot($redInfo['join_num'], 0, $redId);
+            $list = $this->sendRrdBotRoot($redInfo['join_num'], 0, $redId,$redInfo['crowd']);
             //发送消息到 telegram 开始抽奖
             $res = BotFacade::sendPhoto($redInfo['crowd'], $photoUrl, $this->copywriting($redInfo['money'], $redInfo['in_join_user'],$redInfo['username']), $list);
             if (!$res) {
@@ -223,7 +223,7 @@ class BotRedEnvelopeService extends BaseService
             // 更多的数据库操作...
             //返回中奖金额
             //发送消息到 telegram 中奖消息  跟新中奖消息
-            $list = $this->sendRrdBotRoot($dataOne['join_num'], $lotteryUpdate['to_join_num'], $redId);
+            $list = $this->sendRrdBotRoot($dataOne['join_num'], $lotteryUpdate['to_join_num'], $redId,$dataOne['crowd']);
             $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate);
             //更新消息体
             BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'], $this->queryPhotoEdit($dataOne['money'], $amount, $redId,$dataOne['username'], $userInfo), $list);
@@ -278,7 +278,7 @@ class BotRedEnvelopeService extends BaseService
                 return false;
             }
             //获取标签列表
-            $list = $this->sendRrdBotRoot($insert['join_num'], 0, $insertId);
+            $list = $this->sendRrdBotRoot($insert['join_num'], 0, $insertId,$insert['crowd']);
             //发送消息到 telegram 开始抽奖
             $res = BotFacade::sendPhoto($insert['crowd'], $photoUrl, $this->copywriting($insert['money'], $insert['in_join_user'],$insert['username']), $list);
             traceLog($res, 'red-sendStartBotRoot-curl-ok');

@@ -1,7 +1,11 @@
 <?php
 namespace app\common;
 class CacheKey{
+    const REDIS_TG_USER_INFO = 'redis_tg_user_info:%s';//用户登录发红红包系统，获取用户信息 token
+    const REDIS_USER_INFO_TTL = 60*60*3;//用户登录发红红包系统，获取用户信息 token
 
+    const REDIS_TG_USER = 'redis_tg_user:%s';// 用户tg登录过来的信息
+    const REDIS_TG_USER_TTL = 60*10;
     const  REDIS_RED_ID_CREATE_SENG_INFO = 'bot_telegram:create_send_info:%s';//redis创建信息。
     const  REDIS_RED_ID_CREATE_SENG_INFO_TTL = 36000;
 
@@ -12,6 +16,7 @@ class CacheKey{
     const REDIS_TELEGRAM_RED_USER_MESSAGE_ID = 'bot_telegram:rob_red_message_id:%s';
     const REDIS_TELEGRAM_RED_END = 'bot_telegram:rob_red_end:%s';
     const REDIS_TELEGRAM_RED_RECEIVE_USER = 'bot_telegram:rob_red_receive_user:%s';
+    const REDIS_TELEGRAM_RED_RECEIVE_USER_TTL = 60*60*5;
     const REDIS_TELEGRAM_RED_END_TTL = 36000;
     const REDIS_TELEGRAM_RED_USER_MESSAGE_ID_TTL = 36000;
     //当前红包信息最新的 回执消息  1个发起红包 对应一个ID
@@ -30,7 +35,6 @@ class CacheKey{
 
     //计划任务执行状态，在执行 停止 消息队列，消息队列在执行，停止计划任务执行
     const REDIS_RED_COMMAND_IS_STATUS = 'bot_telegram:command_status:%s';
-
 
 
 

@@ -31,4 +31,5 @@ Route::any('/botbot', ApiTelegramBotRedEnvelope::class.'/botbot');
 
 
 ###########################################################
-Route::any('/auth', \app\controller\ApiTelegramBotRedSend::class.'/verifyUser');
+Route::any('/auth', \app\controller\ApiTelegramBotRedSend::class.'/verifyUser');//用户登录，信息获取
+Route::any('/set-create-send', \app\controller\ApiTelegramBotRedSend::class.'/userCreateSendBot')->middleware(\app\middleware\SignMiddleware::class);//用户创建  发起红包

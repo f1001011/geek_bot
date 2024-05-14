@@ -137,9 +137,6 @@ trait TelegramTrait
         return $string . $str;
     }
 
-
-
-
     //验证登录用户是否正确
     function checkTelegramAuthorization($auth_data) {
         $check_hash = $auth_data['hash'];
@@ -160,14 +157,13 @@ trait TelegramTrait
         }
         return $auth_data;
     }
-
     function saveTelegramUserData($auth_data) {
         $auth_data_json = json_encode($auth_data);
-        setcookie('tg_user', $auth_data_json);
+        Cache::set(sprintf(CacheKey::REDIS_TG_USER,$auth_data['id']),$auth_data_json,CacheKey::REDIS_TG_USER_TTL);
     }
 
-    function getTgUser($name = 'tg_user') {
-        $user = getCookie($name);
+    function getTgUser($tgId) {
+        $user = Cache::get(sprintf(CacheKey::REDIS_TG_USER,$tgId));
         if (empty($user)){
             return [];
         }

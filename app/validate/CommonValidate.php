@@ -51,7 +51,7 @@ class CommonValidate extends Validate
     ];
 
     protected $scene = [
-        'send-bot-red'  =>  ['people','num','crowd','money','expire_at','user_id','lottery_type'],
+        'send-bot-red'  =>  ['people','num','crowd','money','expire_at','lottery_type'],
         'set-send-bot-red'  =>  ['red_id','lottery_type'],
     ];
 }

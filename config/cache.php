@@ -29,10 +29,10 @@ return [
             // 驱动方式
             'type'   => 'redis',
             // 服务器地址
-            'host'       => env('REDIS_HOST', '127.0.0.1'),
-            'password'       => env('REDIS_PASSWORD', ''),
+            'host'       => env('redis.redis_host', '127.0.0.1'),
+            'password'       => env('redis.redis_password', ''),
             // 默认使用的数据库索引号
-            'select' => 3,
+            'select' => env('redis.redis_select', 3),
             // 是否持久化连接
             'persistent' => false,
             // Redis连接的前缀，用于区分不同的应用
