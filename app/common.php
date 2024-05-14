@@ -75,3 +75,39 @@ function traceLog($message,$lv=''){
 function traceLogs($message,$lv = 'info',$channel = 'job'){
     \think\facade\Log::channel($channel)->$lv($message);
 }
+
+function hashSha($auth_data){
+    $token = '';//密钥
+    $check_hash = $auth_data['hash'];
+    unset($auth_data['hash']);
+    $data_check_arr = [];
+    foreach ($auth_data as $key => $value) {
+        $data_check_arr[] = $key . '=' . $value;
+    }
+    sort($data_check_arr);
+    $data_check_string = implode("", $data_check_arr);
+    $secret_key = hash('sha256',$token , true);
+    $hash = hash_hmac('sha256', $data_check_string, $secret_key);
+    if (strcmp($hash, $check_hash) !== 0) {
+        throw new Exception('Data is NOT from Telegram');
+    }
+    if ((time() - $auth_data['auth_date']) > 86400) {
+        throw new Exception('Data is outdated');
+    }
+    return $auth_data;
+}
+
+function getCookie($name = ''){
+    return $_COOKIE[$name];
+}
+
+function createGuid(): string
+{
+    $char_id = strtoupper(md5(uniqid(mt_rand(), true)));
+    $hyphen = chr(45);
+    return substr($char_id, 0, 8) . $hyphen
+        . substr($char_id, 8, 4) . $hyphen
+        . substr($char_id, 12, 4) . $hyphen
+        . substr($char_id, 16, 4) . $hyphen
+        . substr($char_id, 20, 12);
+}

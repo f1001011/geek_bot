@@ -1,11 +1,11 @@
 <?php
 
-$BT_TOKEN = 'bot7041131668:AAEkbJ0NBiJ461N9ri4s9OuBt3dXbC1dXm0';
+$BOT_TOKEN = '7041131668:AAEkbJ0NBiJ461N9ri4s9OuBt3dXbC1dXm0';
 return [
-    'bot_token'=>$BT_TOKEN,
-    'bot-url'     => "https://api.telegram.org/$BT_TOKEN/",
-    'bot-binding-url-one'=>"https://redapi.tggame.vip/api/$BT_TOKEN/webhook",//红包领取
-    'bot-binding-url-two'=>"https://redapi.tggame.vip/api/$BT_TOKEN/webhook",//发红包机器人
+    'bot-token'=>$BOT_TOKEN,
+    'bot-url'     => "https://api.telegram.org/bot$BOT_TOKEN/",
+    'bot-binding-url-one'=>"https://redapi.tggame.vip/api/bot$BOT_TOKEN/webhook",//红包领取
+    'bot-binding-url-two'=>"https://redapi.tggame.vip/api/bot$BOT_TOKEN/webhook",//发红包机器人
     'bot-binding-active-url-one'=>'https://redapi.tggame.vip/',//绑定的网站页面地址
     'bot-binding-red-string-one'=>'robRed_',
     'bot-binding-red-photo-one'=>'static/fl.jpg',//福利

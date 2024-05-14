@@ -31,5 +31,4 @@ Route::any('/botbot', ApiTelegramBotRedEnvelope::class.'/botbot');
 
 
 ###########################################################
-//红包发送机器人 7142894277:AAFFkwmT8Y29sTzMB_PgC5v4sNVRQgSLYGw
-Route::any('/api/7142894277-AAFFkwmT8Y29sTzMB_PgC5v4sNVRQgSLYGw/webhook', ApiTelegramBotRedEnvelope::class.'/webhook');
+Route::any('/auth', \app\controller\ApiTelegramBotRedSend::class.'/verifyUser');

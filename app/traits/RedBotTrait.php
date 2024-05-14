@@ -58,7 +58,7 @@ trait RedBotTrait
         if (empty($userInfo)) {
             $userInfo = [
                 'tg_id' => $tgId,
-                'guid' => rand(9999, 99999) . rand(9999, 99999),
+                //'guid' => rand(9999, 99999) . rand(9999, 99999),
                 'player_name' => $tgUser['first_name'],
                 'nickname' => $tgUser['last_name'],
                 'username' => $tgUser['username'],
