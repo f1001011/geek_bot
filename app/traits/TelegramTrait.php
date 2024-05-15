@@ -20,9 +20,8 @@ trait TelegramTrait
         }
 
         $loginUrl = [
-            'url' => 'https://redapi.tggame.vip/?crowd='.$crowd, // 你的登录页面 URL
+            'url' =>  config('telegram.bot-binding-active-url-one').'?crowd='.$crowd, // 你的登录页面 URL
             'forward_text' => '登录成功', // 可选，用户登录成功后，你想让 bot 发送的消息文本
-            'bot_username' => 'YourBotUsername', // 可选，你的 bot 的用户名
             'request_write_access' => true // 可选，请求写访问权限
         ];
 
@@ -38,7 +37,7 @@ trait TelegramTrait
     public function sendRrdBot(string $crowd ='')
     {
         $loginUrl = [
-            'url' => config('bot-binding-active-url-one').'?crowd='.$crowd, // 你的登录页面 URL
+            'url' => config('telegram.bot-binding-active-url-one').'?crowd='.$crowd, // 你的登录页面 URL
             'forward_text' => '登录成功', // 可选，用户登录成功后，你想让 bot 发送的消息文本
             //'bot_username' => 'YourBotUsername', // 可选，你的 bot 的用户名
             'request_write_access' => true // 可选，请求写访问权限

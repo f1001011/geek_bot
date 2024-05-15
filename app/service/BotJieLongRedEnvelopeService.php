@@ -267,8 +267,7 @@ class BotJieLongRedEnvelopeService extends BaseService
 
             //是否需要发送信息时 用户领取了多少U 也显示
             $false = $status == LotteryJoinModel::STATUS_END;
-            //用户领取信息写入
-            $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate);
+
             BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'],
                 $this->jlqueryPhotoEdit($dataOne['money'],
                     bcdiv($dataOne['water_money'], $dataOne['money'], 4),
@@ -282,6 +281,8 @@ class BotJieLongRedEnvelopeService extends BaseService
         }
 
         //选完倒霉蛋之后，返回其他用户的押金  计划任务选取
+        //用户领取信息写入
+        $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate);
         $this->botRedStartSendOrUserEndData();//用户领取接龙红包信息更新redis ttl
         $pid = '';
         $false && $pid = Queue::later(2,CommandJob::class,['command_name'=>JobKey::SEL_HAPLESS_TASK],JobKey::JOB_NAME_COMMAND);

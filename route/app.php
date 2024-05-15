@@ -13,8 +13,9 @@ Route::any('/set-delete', ApiTelegramBotRedEnvelope::class.'/setDelete');
 Route::any('/send-start-bot', ApiTelegramBotRedEnvelope::class.'/sendStartBot');
 
 
-//飞机路由回调
-Route::any('/api/7041131668-AAEkbJ0NBiJ461N9ri4s9OuBt3dXbC1dXm0/webhook', ApiTelegramBotRedEnvelope::class.'/webhook');
+//飞机路由回调 7041131668-AAEkbJ0NBiJ461N9ri4s9OuBt3dXbC1dXm0
+//bot6367289736:AAHbQutLFr0DlEa9Ct3wuOr8ebDLpB8q6Jw
+Route::any('/api/bot/webhook', ApiTelegramBotRedEnvelope::class.'/webhook');
 Route::any('/get-webhook-info', ApiTelegramBotRedEnvelope::class.'/getWebhookInfo');
 Route::any('/get-chats', ApiTelegramBotRedEnvelope::class.'/getChats');
 
@@ -32,4 +33,5 @@ Route::any('/botbot', ApiTelegramBotRedEnvelope::class.'/botbot');
 
 ###########################################################
 Route::any('/auth', \app\controller\ApiTelegramBotRedSend::class.'/verifyUser');//用户登录，信息获取
+Route::any('/send', \app\controller\ApiTelegramBotRedSend::class.'/send');//
 Route::any('/set-create-send', \app\controller\ApiTelegramBotRedSend::class.'/userCreateSendBot')->middleware(\app\middleware\SignMiddleware::class);//用户创建  发起红包

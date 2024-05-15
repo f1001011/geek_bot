@@ -224,7 +224,6 @@ class BotRedEnvelopeService extends BaseService
             //返回中奖金额
             //发送消息到 telegram 中奖消息  跟新中奖消息
             $list = $this->sendRrdBotRoot($dataOne['join_num'], $lotteryUpdate['to_join_num'], $redId,$dataOne['crowd']);
-            $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate);
             //更新消息体
             BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'], $this->queryPhotoEdit($dataOne['money'], $amount, $redId,$dataOne['username'], $userInfo), $list);
             Db::commit();
@@ -234,6 +233,7 @@ class BotRedEnvelopeService extends BaseService
             // 处理异常或返回错误
             return 0;
         }
+        $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate);
         return $amount;
     }
 
