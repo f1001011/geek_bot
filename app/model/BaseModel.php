@@ -21,22 +21,26 @@ class BaseModel extends Model
     }
 
 
-    public function getDataList($map,$field = '*')
+    public function getDataList($map, $field = '*')
     {
         return $this->where($map)->field($field)->order('id', 'desc')->select()->toArray();
     }
 
-    public function getDataPageList($map,$order = [],$page=1,$limit = 10, $field = '*'){
+    public function getDataPageList($map, $order = [], $page = 1, $limit = 10, $field = '*')
+    {
         return $this->where($map)->field($field)->order($order)->paginate([
-            'list_rows'=> $limit,
+            'list_rows' => $limit,
             'page' => $page,
         ]);
     }
 
-    public function delDataOne($map){
+    public function delDataOne($map)
+    {
         return $this->where($map)->delete();
     }
-    public function getDataOne($map,$field = '*'){
+
+    public function getDataOne($map, $field = '*')
+    {
         return $this->where($map)->field($field)->find();
     }
 
@@ -63,11 +67,13 @@ class BaseModel extends Model
         return $model->save($data);
     }
 
-    public function updateAll($data){
-       return $this->saveAll($data);
+    public function updateAll($data)
+    {
+        return $this->saveAll($data);
     }
 
-    public function updateOne($data){
+    public function updateOne($data)
+    {
         return $this->save($data);
     }
 

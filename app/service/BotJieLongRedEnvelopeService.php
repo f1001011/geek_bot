@@ -112,7 +112,7 @@ class BotJieLongRedEnvelopeService extends BaseService
         if ($redInfo['status'] != 0 ) {
             fail([], '已发送');
         }
-
+        $this->setSendPost($redId);
         try {
             //获取标签列表
             $list = $this->sendRrdBotRoot($redInfo['join_num'], 0, $redId,$redInfo['crowd']);

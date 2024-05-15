@@ -12,6 +12,9 @@ class CacheKey{
     //领取红包防止同意IP重复请求
     const REDIS_TELEGRAM_RED_POST_IP = 'bot_telegram:rob_red_repeat:%s';
     const REDIS_TELEGRAM_RED_POST_IP_TTL = 10;
+
+    const REDIS_TELEGRAM_RED_SEND_POST = 'bot_telegram:rob_red_send_post:%s';
+    const REDIS_TELEGRAM_RED_SEND_POST_TTL = 5;
     //用户领取红包之后发送出去的消息回执的消息ID
     const REDIS_TELEGRAM_RED_USER_MESSAGE_ID = 'bot_telegram:rob_red_message_id:%s';
     const REDIS_TELEGRAM_RED_END = 'bot_telegram:rob_red_end:%s';

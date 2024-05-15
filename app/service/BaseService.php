@@ -39,11 +39,20 @@ class BaseService
                 BotFacade::SendCallbackQuery($callbackQueryId, '请勿重复操作');
             }
             trace("{$ip}:{$cache}:请勿重复操作", 'repeatPost');
-            return true;
             die;
         }
     }
 
+    public function setSendPost($redId){
+        //防止 重复发送红包
+        $cache = Cache::get(sprintf(CacheKey::REDIS_TELEGRAM_RED_SEND_POST, $redId));
+        if (!empty($cache)){
+            trace("{$redId}:{$cache}:重复发送红包", 'setSendPost');
+            die;
+        }
+        Cache::set(sprintf(CacheKey::REDIS_TELEGRAM_RED_POST_IP, $redId), date('Y-m-d H:i:s'), CacheKey::REDIS_TELEGRAM_RED_SEND_POST_TTL);
+        return true;
+    }
     //计算 当前；领取红包金额
     public function grabNextRedPack($toMoney, $toPeople)
     {
