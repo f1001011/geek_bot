@@ -116,8 +116,9 @@ trait RedBotTrait
     }
 
     //判断用户抢红包之后，还有没有钱继续发红包的资格
-    public function verifyUserBalance($balance,$need,$callbackQueryId){
-        if($balance < $need){
+    public function verifyUserBalance($balance, $need, $callbackQueryId)
+    {
+        if ($balance < $need) {
             BotFacade::SendCallbackQuery($callbackQueryId, '用户押金不足');
             return fail([], '用户押金不足');
         }
@@ -128,7 +129,7 @@ trait RedBotTrait
     {
         //写入已经领取的用户
         Cache::SADD(sprintf(CacheKey::REDIS_TELEGRAM_RED_RECEIVE_USER, $redId), json_encode(['user_id' => $userInfo['id'], 'money' => $amount, 'user_name' => $userInfo['username']]));
-        Cache::expire(sprintf(CacheKey::REDIS_TELEGRAM_RED_RECEIVE_USER, $redId),CacheKey::REDIS_TELEGRAM_RED_RECEIVE_USER_TTL);
+        Cache::expire(sprintf(CacheKey::REDIS_TELEGRAM_RED_RECEIVE_USER, $redId), CacheKey::REDIS_TELEGRAM_RED_RECEIVE_USER_TTL);
         //写入抽奖结束信息
         if (isset($lotteryUpdateData['status']) && $lotteryUpdateData['status'] != 1) {
             Cache::set(sprintf(CacheKey::REDIS_TELEGRAM_RED_END, $redId), $redId, CacheKey::REDIS_TELEGRAM_RED_END_TTL);
