@@ -9,5 +9,6 @@ return [
     // Session初始化
     // \think\middleware\SessionInit::class
     \app\middleware\LogSqlMiddleware::class,
+    \app\middleware\CorsMiddleware::class,
 
 ];

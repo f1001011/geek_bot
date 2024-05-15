@@ -118,7 +118,7 @@ class BotJieLongRedEnvelopeService extends BaseService
             $list = $this->sendRrdBotRoot($redInfo['join_num'], 0, $redId,$redInfo['crowd']);
             //发送消息到 telegram 开始抽奖
             $res = BotFacade::sendPhoto($redInfo['crowd'], $photoUrl,
-                $this->jlCopywriting($redInfo['money'], bcdiv($redInfo['water_money'], $redInfo['money'], 4), $redInfo['join_num'],$redInfo['username']),
+                $this->jlCopywriting($redInfo['money'], bcdiv($redInfo['water_money'], $redInfo['money'], 4), $redInfo['join_num'],$redInfo['username'],$redInfo),
                 $list);
             if (!$res) {
                 traceLog($res, 'jielong-red-sendStartBotRoot-curl-error');
@@ -173,7 +173,7 @@ class BotJieLongRedEnvelopeService extends BaseService
     //机器人消息体解析 $command 消息命令  $messageId 消息ID  $crowd群号 $tgId领取用户的tgId
     public function getRedBotAnalysis($redId, $tgId, $callbackQueryId, $tgUser = [])
     {
-        $this->repeatPost();//防止重复请求
+        $this->repeatPost($callbackQueryId);//防止重复请求
         //验证用户信息是否存在 (平台是否有信息，可以直接注册和直接返回用户不存在)
         list($userInfo) = $this->verifyUserData($tgId, $tgUser);
         return $this->getRedEnvelopeUser($tgId, $redId, $callbackQueryId, $userInfo);
@@ -264,6 +264,7 @@ class BotJieLongRedEnvelopeService extends BaseService
             UserModel::getInstance()->dec($userInfo['id'], $yinMoney);
             //更新消息体 内联键盘
             $list = $this->sendRrdBotRoot($dataOne['join_num'], $lotteryUpdate['to_join_num'], $redId,$dataOne['crowd']);
+            $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate);
 
             //是否需要发送信息时 用户领取了多少U 也显示
             $false = $status == LotteryJoinModel::STATUS_END;
@@ -282,7 +283,6 @@ class BotJieLongRedEnvelopeService extends BaseService
 
         //选完倒霉蛋之后，返回其他用户的押金  计划任务选取
         //用户领取信息写入
-        $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate);
         $this->botRedStartSendOrUserEndData();//用户领取接龙红包信息更新redis ttl
         $pid = '';
         $false && $pid = Queue::later(2,CommandJob::class,['command_name'=>JobKey::SEL_HAPLESS_TASK],JobKey::JOB_NAME_COMMAND);

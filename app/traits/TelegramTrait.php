@@ -60,7 +60,7 @@ trait TelegramTrait
         $str = '';
         $jsonUser = explode(',', $jsonUser);
         //通过userID获取用户昵称
-        $userList = UserModel::getInstance()->whereIn('id', $jsonUser)->select();
+        $userList = UserModel::getInstance()->whereIn('tg_id', $jsonUser)->select();
         foreach ($userList as $Key => $value) {
             $date = date('H:i:s');
             //$str .= "🏆{$money}U({$date}-{$value['username']}" . language('klq') . ")\n";
@@ -107,7 +107,7 @@ trait TelegramTrait
     }
 
     //接龙红包文案 $money 红包额度  $moneyT 红包额度+水钱  $waterMoney 水钱 $num 抢的人数 $water 扣税率
-    public function jlCopywriting($money = 0, $waterL = 0, $num = '', $username = '', $moneyT = 0, $waterMoney = 0)
+    public function jlCopywriting($money = 0, $waterL = 0, $num = '', $username = '', $redInfo=[])
     {
         $string = '🧧' . language('title-hb') . '🧧' . "\n";
         $string .= language('tgjlhbwasend', $username, $money, $num, $waterL);
@@ -167,5 +167,8 @@ trait TelegramTrait
             return [];
         }
         return json_decode($user,true);
+    }
+    function getUser($tgId){
+       return UserModel::getInstance()->getDataUserOne(['tg_id'=>$tgId]);
     }
 }

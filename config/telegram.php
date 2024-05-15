@@ -7,7 +7,8 @@ return [
     'bot-url'     => "https://api.telegram.org/bot$BOT_TOKEN/",
     'bot-binding-url-one'=>"https://redapi.tggame.vip/api/bot/webhook",//红包领取  机器人要改过
     'bot-binding-url-two'=>"https://redapi.tggame.vip/api/bot/webhook",//发红包机器人
-    'bot-binding-active-url-one'=>'https://redapi.tggame.vip/',//我的绑定的网站页面地址
+//    'bot-binding-active-url-one'=>'https://redapi.tggame.vip/',//我的绑定的网站页面地址https://plat-test.tggame.vip/#/redBag
+    'bot-binding-active-url-one'=>'https://plat-test.tggame.vip/#/redBag',//我的绑定的网站页面地址
     'bot-binding-red-string-one'=>'robRed_',
     'bot-binding-red-photo-one'=>'static/fl.jpg',//福利
     'bot-binding-red-photo-two'=>'static/dx.jpg',//定向

@@ -88,8 +88,7 @@ class TelegramBotBin extends BaseFacade
         curl_close($ch);
         // 输出响应结果
         traceLog($response, 'sendPhoto');
-        dump($response);
-        die;
+
         return $response;
     }
 
@@ -177,60 +176,24 @@ class TelegramBotBin extends BaseFacade
     {
 
 
-        $postData = [
-            'chat_id' => $chatId,
-            'text' => $message,
-            'parse_mode' => 'HTML', // 可选，如果你需要解析特殊字符
-        ];
         // 初始化 cURL
         $url = self::$url . 'sendMessage';
         // 将键盘编码为JSON
-        if (!empty($keyboard)) {
-            $postData['reply_markup'] = $keyboard;
-        }
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-        // 发送请求并获取响应
-        $response = curl_exec($ch);
-
-        // 检查是否有错误发生
-        if (curl_errno($ch)) {
-            $error_msg = curl_error($ch);
-            echo "cURL Error: " . $error_msg;
-        }
-
-        curl_close($ch);
-        dump($response);
-        // 构造请求的 URL
-
-
-        dump($url);
-        die;
         // 准备 POST 数据
+        $postData = array(
+            'chat_id' => $chatId,
+            'text' => $message,
+            'parse_mode' => 'HTML',
+        );
 
-
-
-
-        // 将 POST 数据转换为 JSON 格式的字符串
-        $postDataJson = json_encode($postData);
-
+        if (!empty($keyboard)) {
+            $postData['reply_markup'] = json_encode(['inline_keyboard' => $keyboard]);
+        }
+        // 初始化 cURL
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-//        // 初始化 cURL
-//        $ch = curl_init($url);
-//        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-//        curl_setopt($ch, CURLOPT_POSTFIELDS, $postDataJson);
-//        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-//            'Content-Type: application/json',
-//            'Content-Length: ' . strlen($postDataJson)
-//        ]);
 
         // 发送请求并获取响应
         $response = curl_exec($ch);
@@ -241,8 +204,6 @@ class TelegramBotBin extends BaseFacade
 
         // 关闭 cURL 资源
         curl_close($ch);
-        dump($response);
-        die;
         traceLog($response, 'sendMessage');
         // 处理响应（如果需要）
         return $response;

@@ -3,13 +3,13 @@
 
 function success(array $data = [], $message = 'message', int $code = 200)
 {
-    echo json_encode(['data' => $data, 'message' => $message, 'code' => $code]);
+    echo json_encode(['result' => $data, 'message' => $message, 'code' => $code]);
     die;
 }
 
 function fail(array $data = [], $message = 'message', int $code = 500)
 {
-    echo json_encode(['data' => $data, 'message' => $message, 'code' => $code]);
+    echo json_encode(['result' => $data, 'message' => $message, 'code' => $code]);
     die;
 }
 

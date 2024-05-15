@@ -26,6 +26,13 @@ class BaseModel extends Model
         return $this->where($map)->field($field)->order('id', 'desc')->select()->toArray();
     }
 
+    public function getDataPageList($map,$order = [],$page=1,$limit = 10, $field = '*'){
+        return $this->where($map)->field($field)->order($order)->paginate([
+            'list_rows'=> $limit,
+            'page' => $page,
+        ]);
+    }
+
     public function delDataOne($map){
         return $this->where($map)->delete();
     }

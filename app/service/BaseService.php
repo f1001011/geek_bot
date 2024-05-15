@@ -3,6 +3,7 @@
 namespace app\service;
 
 use app\common\CacheKey;
+use app\facade\BotFacade;
 use app\model\LotteryJoinModel;
 use think\facade\Cache;
 use think\facade\Request;
@@ -25,7 +26,7 @@ class BaseService
 
 
     //防止i重复点击
-    public function repeatPost()
+    public function repeatPost($callbackQueryId = '')
     {
         $ip = Request::ip();
         //防止重复请求
@@ -34,7 +35,11 @@ class BaseService
             Cache::set(sprintf(CacheKey::REDIS_TELEGRAM_RED_POST_IP, $ip), date('Y-m-d H:i:s'), CacheKey::REDIS_TELEGRAM_RED_POST_IP_TTL);
         } else {
             //请勿重复操作
+            if (!empty($callbackQueryId)){
+                BotFacade::SendCallbackQuery($callbackQueryId, '请勿重复操作');
+            }
             trace("{$ip}:{$cache}:请勿重复操作", 'repeatPost');
+            return true;
             die;
         }
     }

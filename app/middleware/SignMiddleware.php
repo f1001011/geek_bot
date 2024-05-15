@@ -29,9 +29,15 @@ class SignMiddleware
         if (empty($jsonUser)){
             fail([],language('sign error'),CodeName::SIGN_ERROR);
         }
-
         //用户信息
         $request->user_info  = json_decode($jsonUser,true);
+
+        $tgJsonUser = Cache::get(sprintf(CacheKey::REDIS_TG_USER,$data['tg_id']));
+        if (empty($tgJsonUser)){
+            fail([],language('sign error'),CodeName::SIGN_ERROR);
+        }
+
+        $request->tg_user_info  = json_decode($tgJsonUser,true);
         return $next($request);
     }
     public function end(\think\Response $response)

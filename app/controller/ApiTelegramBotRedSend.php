@@ -2,6 +2,7 @@
 
 namespace app\controller;
 
+use app\model\UserModel;
 use app\service\BotJieLongRedEnvelopeService;
 use app\service\BotRedEnvelopeService;
 use app\service\BotRedSendService;
@@ -50,6 +51,8 @@ class ApiTelegramBotRedSend extends ApiBase
         //$userInfo = BotRedSendService::getInstance()->getUserInfo();
         $userId = $this->request->user_info['id'];
         $tgId = $this->request->user_info['tg_id'];
+        $param['crowd'] = $this->request->tg_user_info['crowd'];
+
         //判断是那种红包
         switch ($param['lottery_type']) {
             case 0:
@@ -60,6 +63,11 @@ class ApiTelegramBotRedSend extends ApiBase
                     fail([], '定向红包必须要有中奖人员');
                 }
                 $param['num'] = 1;
+
+                $userInfo = BotRedEnvelopeService::getInstance()->getTgUser($param['people']);
+                if (empty($userInfo)){
+                    fail([], '用户未参加平台活动');
+                }
                 $data = BotRedEnvelopeService::getInstance()->createSend($param['money'], $param['people'], $param['num'], $param['crowd'], date('Y-m-d H:i:s'), $userId, $tgId, $param['expire_at'] ?? 0);
                 break;
             case 2:
@@ -69,9 +77,10 @@ class ApiTelegramBotRedSend extends ApiBase
                 break;
         }
 
-        if ($data) {
+        if (!$data) {
             fail();
         }
         success();
     }
+
 }

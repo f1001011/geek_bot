@@ -8,6 +8,7 @@ use app\service\BotCommonService;
 use app\service\BotCrowdListService;
 use app\service\BotJieLongRedEnvelopeService;
 use app\service\BotRedEnvelopeService;
+use app\service\BotRedSendService;
 use app\validate\CommonValidate;
 use think\exception\ValidateException;
 
@@ -56,6 +57,8 @@ class ApiTelegramBotRedEnvelope extends ApiBase
 
         //判断是否是新消息。机器人加入房间消息
         $this->botCrowd($request);
+        //判断是否是系统命令 比如 start
+        $this->systemCommand($request);
 
         if (empty($request) || empty($request['callback_query']['message'])) {
             // 消息体错误
@@ -81,74 +84,74 @@ class ApiTelegramBotRedEnvelope extends ApiBase
     }
 
     //后台创建发送红包订单
-    public function createSendBot()
-    {
-        $param = $this->request->param();
-        try {
-            validate(CommonValidate::class)->scene('send-bot-red')->check($param);
-        } catch (ValidateException $e) {
-            traceLog($e->getError(), 'createSendBot-error');
-            fail([], $e->getError());
-        }
-        $userId = 5;//获取userId
-        $tgId = 7198514363;//获取tgID
-
-        //判断是那种红包
-        switch ($param['lottery_type']) {
-            case 0:
-                $data = BotRedEnvelopeService::getInstance()->createSend($param['money'], '', $param['num'], $param['crowd'], date('Y-m-d H:i:s'), $userId, $tgId, $param['expire_at'] ?? 0);
-                break;
-            case 1:
-                if (empty($param['people'])){
-                    fail([],'定向红包必须要有中奖人员');
-                }
-                $param['num'] = 1;
-                $data = BotRedEnvelopeService::getInstance()->createSend($param['money'], $param['people'], $param['num'], $param['crowd'], date('Y-m-d H:i:s'), $userId, $tgId, $param['expire_at'] ?? 0);
-                break;
-            case 2:
-                $data = BotJieLongRedEnvelopeService::getInstance()->createSend($param['crowd'], $param['money'], $param['num'], $userId, $tgId, date('Y-m-d H:i:s'), $param['expire_at'] ?? 0);
-
-                break;
-            case 3:
-                break;
-        }
-
-        if (!$data) {
-            fail();
-        }
-        success();
-    }
+//    public function createSendBot()
+//    {
+//        $param = $this->request->param();
+//        try {
+//            validate(CommonValidate::class)->scene('send-bot-red')->check($param);
+//        } catch (ValidateException $e) {
+//            traceLog($e->getError(), 'createSendBot-error');
+//            fail([], $e->getError());
+//        }
+//        $userId = 5;//获取userId
+//        $tgId = 7198514363;//获取tgID
+//
+//        //判断是那种红包
+//        switch ($param['lottery_type']) {
+//            case 0:
+//                $data = BotRedEnvelopeService::getInstance()->createSend($param['money'], '', $param['num'], $param['crowd'], date('Y-m-d H:i:s'), $userId, $tgId, $param['expire_at'] ?? 0);
+//                break;
+//            case 1:
+//                if (empty($param['people'])){
+//                    fail([],'定向红包必须要有中奖人员');
+//                }
+//                $param['num'] = 1;
+//                $data = BotRedEnvelopeService::getInstance()->createSend($param['money'], $param['people'], $param['num'], $param['crowd'], date('Y-m-d H:i:s'), $userId, $tgId, $param['expire_at'] ?? 0);
+//                break;
+//            case 2:
+//                $data = BotJieLongRedEnvelopeService::getInstance()->createSend($param['crowd'], $param['money'], $param['num'], $userId, $tgId, date('Y-m-d H:i:s'), $param['expire_at'] ?? 0);
+//
+//                break;
+//            case 3:
+//                break;
+//        }
+//
+//        if (!$data) {
+//            fail();
+//        }
+//        success();
+//    }
 
     //点击按钮发送红包开始
-    public function setSendBot()
-    {
-
-        //验证是否是拥有者发的
-        if (true) {
-            //不是本人不可以发送
-        }
-
-        $param = $this->request->param();
-        try {
-            validate(CommonValidate::class)->scene('set-send-bot-red')->check($param);
-        } catch (ValidateException $e) {
-            fail([], $e->getError());
-        }
-
-        //用户点击的时候。获取信息，先插入信息。在执行发送消息
-
-        switch ($param['lottery_type']) {
-            case 0:
-            case 1:
-                BotRedEnvelopeService::getInstance()->setSend($param['red_id']);
-                break;
-            case 2:
-                BotJieLongRedEnvelopeService::getInstance()->setSend($param['red_id']);
-                break;
-            //return BotRedEnvelopeService::getInstance()->setSend($param['red_id']);
-        }
-        success();
-    }
+//    public function setSendBot()
+//    {
+//
+//        //验证是否是拥有者发的
+//        if (true) {
+//            //不是本人不可以发送
+//        }
+//
+//        $param = $this->request->param();
+//        try {
+//            validate(CommonValidate::class)->scene('set-send-bot-red')->check($param);
+//        } catch (ValidateException $e) {
+//            fail([], $e->getError());
+//        }
+//
+//        //用户点击的时候。获取信息，先插入信息。在执行发送消息
+//
+//        switch ($param['lottery_type']) {
+//            case 0:
+//            case 1:
+//                BotRedEnvelopeService::getInstance()->setSend($param['red_id']);
+//                break;
+//            case 2:
+//                BotJieLongRedEnvelopeService::getInstance()->setSend($param['red_id']);
+//                break;
+//            //return BotRedEnvelopeService::getInstance()->setSend($param['red_id']);
+//        }
+//        success();
+//    }
 
     //开始发送红包 后台发起抽奖 接口发红包。直接发出去
     public function sendStartBot()
@@ -206,6 +209,20 @@ class ApiTelegramBotRedEnvelope extends ApiBase
         return true;
     }
 
+    public function systemCommand($request){
+
+        if (empty($request) || empty($request['message']['text'])) {
+            // 消息体错误
+           return;
+        }
+        //如果是系统命令
+        $message = $request['message'];
+        if (empty($message['chat']['id'])){
+         return ;
+        }
+        BotRedSendService::getInstance()->send($message['chat']['id']);
+
+    }
 
     public function test()
     {

@@ -133,7 +133,7 @@ class BotRedEnvelopeService extends BaseService
     //机器人消息体解析 $command 消息命令  $messageId 消息ID  $crowd群号 $tgId领取用户的tgId
     public function getRedBotAnalysis($redId, $tgId, $callbackQueryId, $tgUser = [])
     {
-        $this->repeatPost();//防止重复请求
+        $this->repeatPost($callbackQueryId);//防止重复请求
         //验证用户信息是否存在 (平台是否有信息，可以直接注册和直接返回用户不存在)
         list($userInfo) = $this->verifyUserData($tgId, $tgUser);
         return $this->getRedEnvelopeUser($tgId, $redId, $callbackQueryId, $userInfo);
@@ -150,10 +150,10 @@ class BotRedEnvelopeService extends BaseService
         $inJoinUser = $this->getInJoinUserList($dataOne['in_join_user']);
         //如果不存在的时候，说明当前没有固定用户 抢红包，把当前用户丢进红包中
         if (empty($inJoinUser)) {
-            $inJoinUser[] = $userInfo['id']; // 如果是 tgid 就换tgid。。
+            $inJoinUser[] = $userInfo['tg_id']; // 如果是 tgid 就换tgid。。
         }
         // 如果是 tgid 就换tgid。。
-        if (!in_array($userInfo['id'], $inJoinUser)) {
+        if (!in_array($userInfo['tg_id'], $inJoinUser)) {
             BotFacade::SendCallbackQuery($callbackQueryId, '仅指定用户可抢');
             return fail([], '用户不具备抢红包资格');
         }
@@ -224,6 +224,8 @@ class BotRedEnvelopeService extends BaseService
             //返回中奖金额
             //发送消息到 telegram 中奖消息  跟新中奖消息
             $list = $this->sendRrdBotRoot($dataOne['join_num'], $lotteryUpdate['to_join_num'], $redId,$dataOne['crowd']);
+            $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate);
+
             //更新消息体
             BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'], $this->queryPhotoEdit($dataOne['money'], $amount, $redId,$dataOne['username'], $userInfo), $list);
             Db::commit();
@@ -233,7 +235,6 @@ class BotRedEnvelopeService extends BaseService
             // 处理异常或返回错误
             return 0;
         }
-        $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate);
         return $amount;
     }
 

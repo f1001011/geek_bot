@@ -27,6 +27,7 @@ class BotRedSendService extends BaseService
         isset($get['username']) && $tgUser['username'] = $get['username'];
         isset($get['auth_date']) && $tgUser['auth_date'] = $get['auth_date'];
         isset($get['hash']) && $tgUser['hash'] = $get['hash'];
+        isset($get['photo_url']) && $tgUser['photo_url'] = $get['photo_url'];
         try {
             $auth_data = $this->checkTelegramAuthorization($tgUser);
             isset($get['crowd']) && $auth_data['crowd'] = $get['crowd'];

@@ -5,7 +5,7 @@ class CacheKey{
     const REDIS_USER_INFO_TTL = 60*60*3;//用户登录发红红包系统，获取用户信息 token
 
     const REDIS_TG_USER = 'redis_tg_user:%s';// 用户tg登录过来的信息
-    const REDIS_TG_USER_TTL = 60*10;
+    const REDIS_TG_USER_TTL = 60*100;
     const  REDIS_RED_ID_CREATE_SENG_INFO = 'bot_telegram:create_send_info:%s';//redis创建信息。
     const  REDIS_RED_ID_CREATE_SENG_INFO_TTL = 36000;
 
