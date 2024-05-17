@@ -2,12 +2,14 @@
 
 namespace app\controller;
 
+use app\common\CacheKey;
 use app\model\UserModel;
 use app\service\BotJieLongRedEnvelopeService;
 use app\service\BotRedEnvelopeService;
 use app\service\BotRedSendService;
 use app\validate\CommonValidate;
 use think\exception\ValidateException;
+use think\facade\Cache;
 
 class ApiTelegramBotRedSend extends ApiBase
 {
@@ -52,7 +54,14 @@ class ApiTelegramBotRedSend extends ApiBase
         //$userInfo = BotRedSendService::getInstance()->getUserInfo();
         $userId = $this->request->user_info['id'];
         $tgId = $this->request->user_info['tg_id'];
-        $param['crowd'] = $this->request->tg_user_info['crowd'];
+        $tgUser = Cache::get(sprintf(CacheKey::REDIS_TELEGRAM_CROWD_TG_USER,$tgId));
+
+        if (empty($tgUser)){
+            fail([], '请从群组发红包');
+        }
+
+        $tgUser = json_decode($tgUser,true);
+        $param['crowd'] = $tgUser['crowd'];
 
         //判断是那种红包
         switch ($param['lottery_type']) {

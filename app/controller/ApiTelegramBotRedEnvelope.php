@@ -58,7 +58,11 @@ class ApiTelegramBotRedEnvelope extends ApiBase
         //判断是否是新消息。机器人加入房间消息
         $this->botCrowd($request);
         //判断是否是系统命令 比如 start
-        $this->systemCommand($request);
+        if (empty($request) || empty($request['message']['text'])) {
+            // 消息体错误
+            $this->systemCommand($request);
+            return;
+        }
 
         if (empty($request) || empty($request['callback_query']['message'])) {
             // 消息体错误
@@ -80,6 +84,13 @@ class ApiTelegramBotRedEnvelope extends ApiBase
         if ($command == 'my_red_send'){
             //返回用户我要发红包按钮
             BotCommonService::getInstance()->myRedSend($crowd,$tgUser,$messageId);
+            success();
+        }
+
+        if ($command == 'start' || $command == '/start'){
+            //返回主菜单
+            BotRedSendService::getInstance()->send($crowd,$messageId);
+            //BotCommonService::getInstance()->send($crowd,$tgUser,$messageId);
             success();
         }
 

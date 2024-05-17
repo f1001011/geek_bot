@@ -14,9 +14,13 @@ class BotRedSendService extends BaseService
 {
     use TelegramTrait;
     use RedBotTrait;
-    public function send($crowd){
+    public function send($crowd,$messageId=0){
         $list = $this->sendRrdBot($crowd);
-        BotFacade::sendWebhook($crowd,'发送消息',$list);
+        if ($messageId > 0){
+            BotFacade::editMessageText($crowd, $messageId,'主菜单', $list);
+        }else{
+            BotFacade::sendWebhook($crowd,'主菜单',$list);
+        }
         return true;
     }
 
@@ -30,15 +34,22 @@ class BotRedSendService extends BaseService
         isset($get['auth_date']) && $tgUser['auth_date'] = $get['auth_date'];
         isset($get['hash']) && $tgUser['hash'] = $get['hash'];
         isset($get['photo_url']) && $tgUser['photo_url'] = $get['photo_url'];
-        try {
-            $auth_data = $this->checkTelegramAuthorization($tgUser);
-            isset($get['crowd']) && $auth_data['crowd'] = $get['crowd'];
-            $this->saveTelegramUserData($auth_data);
-        } catch (Exception $e) {
-            traceLog($e->getMessage());
-            return false;
+        //不验证是否是 telegram 信息了
+//        try {
+//            $auth_data = $this->checkTelegramAuthorization($tgUser);
+//            isset($get['crowd']) && $auth_data['crowd'] = $get['crowd'];
+//            $this->saveTelegramUserData($auth_data);
+//        } catch (Exception $e) {
+//            traceLog($e->getMessage());
+//            return false;
+//        }
+        //查询redis 是否有信息
+        traceLog($get, '$get$get$get$get$get$get-error');
+        $tgUser = Cache::get(sprintf(CacheKey::REDIS_TELEGRAM_CROWD_TG_USER,$get['id']));
+        if ($tgUser){
+            return true;
         }
-        return true;
+        return false;
     }
 
     //获取tg用户账号
@@ -55,7 +66,7 @@ class BotRedSendService extends BaseService
 
     public function redSend($crowd,$tgUser,$messageId){
         $list = $this->myRedSend();
-        BotFacade::editMessageCaption($crowd, $messageId,'欢迎使用天天娱乐红包机器人', $list);
+        BotFacade::editMessageText($crowd, $messageId,'欢迎使用天天娱乐红包机器人', $list);
         //BotFacade::sendPhotoEdit($crowd,  config("telegram.bot-binding-red-photo"),'欢迎使用天天娱乐红包机器人', $list,$messageId);
         //保存用户redis信息
         $tgUser['crowd'] = $crowd;
