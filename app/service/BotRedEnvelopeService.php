@@ -243,65 +243,65 @@ class BotRedEnvelopeService extends BaseService
 
 
     //管理员创建发送红包
-    public function createSendStartBotRoot(float $money, string $people, int $joinNum, string $crowd, $startAt, int $expireAt = 0)
-    {
-        $insert = [
-            'tg_id' => 0,
-            'crowd' => $crowd,
-            'status' => 1,
-            'activity_on' => getRedEnvelopeOn(),
-            'money' => $money,
-            'join_num' => $joinNum,
-            'to_join_num' => 0,
-            'expire_at' => $expireAt,
-            'start_at' => $startAt,
-            'in_join_user' => '',
-            'lottery_type' => 0,
-        ];
-
-        if (!empty($people)) {
-            $insert['in_join_user'] = $people;
-            $insert['lottery_type'] = 1;
-        }
-        return $this->sendStartBotRoot($insert);
-    }
-
-    //开始发送红包
-    public function sendStartBotRoot(array $insert = [])
-    {
-        $photoUrl = public_path() . config('telegram.bot-binding-red-photo-one');
-        if (!file_exists($photoUrl)) {
-            return false;
-        }
-
-        // 启动事务
-        Db::startTrans();
-        try {
-            //发送红包 //写入数据成功
-            if (!$insertId = LotteryJoinModel::getInstance()->setInsert($insert)) {
-                return false;
-            }
-            //获取标签列表
-            $list = $this->sendRrdBotRoot($insert['join_num'], 0, $insertId,$insert['crowd']);
-            //发送消息到 telegram 开始抽奖
-            $res = BotFacade::sendPhoto($insert['crowd'], $photoUrl, $this->copywriting($insert['money'], $insert['in_join_user'],$insert['username']), $list);
-            traceLog($res, 'red-sendStartBotRoot-curl-ok');
-            if (!$res) {
-                traceLog($res, 'red-sendStartBotRoot-curl-error');
-                throw new \think\exception\HttpException(404, 'curl 失败');
-            }
-            $request = json_decode($res, true);
-            //修改红包数据
-            LotteryJoinModel::getInstance()->setUpdate(['id' => $insertId], ['message_id' => $request['result']['message_id']]);
-            // 提交事务
-            Db::commit();
-        } catch (\Exception $e) {
-            // 回滚事务
-            Db::rollback();
-            return false;
-        }
-        return true;
-    }
+//    public function createSendStartBotRoot(float $money, string $people, int $joinNum, string $crowd, $startAt, int $expireAt = 0)
+//    {
+//        $insert = [
+//            'tg_id' => 0,
+//            'crowd' => $crowd,
+//            'status' => 1,
+//            'activity_on' => getRedEnvelopeOn(),
+//            'money' => $money,
+//            'join_num' => $joinNum,
+//            'to_join_num' => 0,
+//            'expire_at' => $expireAt,
+//            'start_at' => $startAt,
+//            'in_join_user' => '',
+//            'lottery_type' => 0,
+//        ];
+//
+//        if (!empty($people)) {
+//            $insert['in_join_user'] = $people;
+//            $insert['lottery_type'] = 1;
+//        }
+//        return $this->sendStartBotRoot($insert);
+//    }
+//
+//    //开始发送红包
+//    public function sendStartBotRoot(array $insert = [])
+//    {
+//        $photoUrl = public_path() . config('telegram.bot-binding-red-photo-one');
+//        if (!file_exists($photoUrl)) {
+//            return false;
+//        }
+//
+//        // 启动事务
+//        Db::startTrans();
+//        try {
+//            //发送红包 //写入数据成功
+//            if (!$insertId = LotteryJoinModel::getInstance()->setInsert($insert)) {
+//                return false;
+//            }
+//            //获取标签列表
+//            $list = $this->sendRrdBotRoot($insert['join_num'], 0, $insertId,$insert['crowd']);
+//            //发送消息到 telegram 开始抽奖
+//            $res = BotFacade::sendPhoto($insert['crowd'], $photoUrl, $this->copywriting($insert['money'], $insert['in_join_user'],$insert['username']), $list);
+//            traceLog($res, 'red-sendStartBotRoot-curl-ok');
+//            if (!$res) {
+//                traceLog($res, 'red-sendStartBotRoot-curl-error');
+//                throw new \think\exception\HttpException(404, 'curl 失败');
+//            }
+//            $request = json_decode($res, true);
+//            //修改红包数据
+//            LotteryJoinModel::getInstance()->setUpdate(['id' => $insertId], ['message_id' => $request['result']['message_id']]);
+//            // 提交事务
+//            Db::commit();
+//        } catch (\Exception $e) {
+//            // 回滚事务
+//            Db::rollback();
+//            return false;
+//        }
+//        return true;
+//    }
 
     //计算中奖用户
     private function getInJoinUserList($data = '')

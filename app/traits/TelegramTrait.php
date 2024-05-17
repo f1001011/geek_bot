@@ -12,11 +12,15 @@ use think\facade\Cache;
 trait TelegramTrait
 {
     //管理员发送红包
-    public function sendRrdBotRoot(int $startNum = 0, int $endNum = 0, string $param = '', string $crowd = '')
+    public function sendRrdBotRoot(int $startNum = 0, int $endNum = 0, string $param = '', string $crowd = '',$mine='')
     {
         $string = "($endNum/$startNum)";
         if ($startNum <= $endNum) {
             $string .= language('yqg');
+        }
+        if (!empty($mine)){
+            //雷号码
+            $string.= '💣 '.$mine;
         }
 
 //        $loginUrl = [
@@ -114,6 +118,13 @@ trait TelegramTrait
 
         }
         return $string . $str;
+    }
+
+    //地雷红包发送文案
+    public function zdCopywriting($money = 0, $username = '')
+    {
+        $string = '🧧' . language('title-hb') . '🧧' . "\n" . language('flgzsordl', "<b>$username</b>", "{$money}U");
+        return $string;
     }
 
     //用户领取红包  发起抢红包信息 telegram 展示

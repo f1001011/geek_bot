@@ -4,6 +4,7 @@ namespace app\controller;
 
 use app\service\BotJieLongRedEnvelopeService;
 use app\service\BotRedEnvelopeService;
+use app\service\BotRedMineService;
 use app\service\BotRedSendService;
 use app\validate\CommonValidate;
 use think\exception\ValidateException;
@@ -49,7 +50,7 @@ class ApiTelegramBotRedSend extends ApiBase
 
         //获取是否注册了平台 和用户信息
         $userId = $this->request->user_info['id'];
-
+        $tgId = $this->request->user_info['tg_id'];
         $param['crowd'] = config('telegram.crowd');
 
         //判断是那种红包
@@ -73,6 +74,10 @@ class ApiTelegramBotRedSend extends ApiBase
                 $data = BotJieLongRedEnvelopeService::getInstance()->createSend($param['crowd'], $param['money'], $param['num'], $userId, $tgId, date('Y-m-d H:i:s'), $param['expire_at'] ?? 0);
                 break;
             case 3:
+                if ($param['password'] <= 0 ){
+                    fail([], '输入炸雷红包密码');
+                }
+                $data = BotRedMineService::getInstance()->createSend($param['crowd'], $param['money'], $param['password'], $userId, $tgId, date('Y-m-d H:i:s'), $param['expire_at'] ?? 0);
                 break;
         }
 

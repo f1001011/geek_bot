@@ -190,7 +190,7 @@ class BotJieLongRedEnvelopeService extends BaseService
         //抢红包需要押金，判断用户是否金额足够
         //本次需要扣除的押金和水钱
         $depositMoney = $dataOne['money'] + $dataOne['water_money'];
-        if ($dataOne['lottery_type'] == LotteryJoinModel::IS__STATUS_END_JL) {
+        if ($dataOne['lottery_type'] == LotteryJoinModel::RED_TYPE_JL) {
             $this->verifyUserBalance($userInfo['balance'], $depositMoney, $callbackQueryId);
         }
 
