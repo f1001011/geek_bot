@@ -2,11 +2,13 @@
 
 namespace app\service;
 
+use app\common\CacheKey;
 use app\facade\BotFacade;
 use app\model\UserModel;
 use app\traits\RedBotTrait;
 use app\traits\TelegramTrait;
 use think\Exception;
+use think\facade\Cache;
 
 class BotRedSendService extends BaseService
 {
@@ -51,6 +53,13 @@ class BotRedSendService extends BaseService
         return $userInfo;
     }
 
-
-
+    public function redSend($crowd,$tgUser,$messageId){
+        $list = $this->myRedSend();
+        BotFacade::editMessageCaption($crowd, $messageId,'欢迎使用天天娱乐红包机器人', $list);
+        //BotFacade::sendPhotoEdit($crowd,  config("telegram.bot-binding-red-photo"),'欢迎使用天天娱乐红包机器人', $list,$messageId);
+        //保存用户redis信息
+        $tgUser['crowd'] = $crowd;
+        Cache::set(sprintf(CacheKey::REDIS_TELEGRAM_CROWD_TG_USER,$tgUser['id']),json_encode($tgUser),60*60*24*3);
+        return true;
+    }
 }

@@ -28,6 +28,7 @@ class ApiTelegramBotRedSend extends ApiBase
         $get = $this->request->get();
         $isTelegram = BotRedSendService::getInstance()->verifyUser($get);
         if (!$isTelegram) {
+            //traceLog($get,'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
             fail([], '不是telegram来源');
         }
         //获取是否注册了平台 和用户信息

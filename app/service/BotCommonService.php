@@ -3,6 +3,7 @@
 namespace app\service;
 
 use app\common\CacheKey;
+use app\facade\BotFacade;
 use app\model\LotteryJoinModel;
 use think\facade\Cache;
 
@@ -63,6 +64,12 @@ class BotCommonService extends BaseService
     {
         //获取总的键盘布局  包含发 定向红包。福利红包。接龙红包。地雷红包
 
+    }
+
+    //用户点击我要发红按钮，保存用户发红包信息。并且跳转到用户自己页面，返回用户可发红包点击按钮
+    public function myRedSend($crowd,$tgUser,$messageId){
+        //用户返回我要发红包按钮
+        return BotRedSendService::getInstance()->redSend($crowd,$tgUser,$messageId);
     }
 
 }

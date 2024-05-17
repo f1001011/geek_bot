@@ -73,10 +73,20 @@ class ApiTelegramBotRedEnvelope extends ApiBase
         $crowd = $data['message']['chat']['id'];//群ID
         $command = $data['data'];//输入命令
         $tgId = $data['from']['id'];//用户的tgId
+        $tgUser = $data['from'];//用户信息
         traceLog(['message_id' => $messageId, 'crowd' => $crowd, 'command' => $command,], 'red-webhook-data');
+
+        //判断是否是 发送红包命令
+        if ($command == 'my_red_send'){
+            //返回用户我要发红包按钮
+            BotCommonService::getInstance()->myRedSend($crowd,$tgUser,$messageId);
+            success();
+        }
+
         //1 判断是否是红包领取命令   命令是否正确
         if (strpos($command, config('telegram.bot-binding-red-string-one')) !== false) {
             BotCommonService::getInstance()->verifyRedType($command, $tgId, $request['callback_query']['id'], $request['callback_query']['from']);
+            success();
         }
 
         //如果是接龙红包

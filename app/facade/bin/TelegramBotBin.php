@@ -295,4 +295,32 @@ class TelegramBotBin extends BaseFacade
         // 处理响应（如果需要）
         return $response;
     }
+
+    public static function editMessageText($chatId = 0, $messageId = 0, $message = '', $keyboard = '')
+    {
+        // 发送一个空消息，只包含内联键盘
+        $editMessageUrl = self::$url . "editMessageText";
+        $postFields = [
+            'chat_id' => $chatId,
+            'message_id' => $messageId,
+            'text' => $message,
+            'parse_mode' => 'HTML'
+        ];
+        if (!empty($keyboard)) {
+            $postFields['reply_markup'] = json_encode(['inline_keyboard' => $keyboard]);
+        }
+
+        $ch = curl_init($editMessageUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
+        $response = curl_exec($ch);
+        if (curl_errno($ch)) {
+            traceLog(curl_error($ch), 'editMessageText error');
+        }
+        curl_close($ch);
+        traceLog($response, 'editMessageText');
+        // 处理响应（如果需要）
+        return $response;
+    }
 }

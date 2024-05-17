@@ -8,9 +8,7 @@ class ApiUserMoneyLog extends ApiBase
 
 
     public function joinUserLog(){
-        //获取用户参与红包记录
-
-
+    
     }
     public function joinLog(){
 

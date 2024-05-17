@@ -3,7 +3,7 @@
 return [
     // 多语言加载
     \think\middleware\LoadLangPack::class,
-    \app\middleware\LogMiddleware::class,
+//    \app\middleware\LogMiddleware::class,
     // 全局请求缓存
     // \think\middleware\CheckRequestCache::class,
     // Session初始化

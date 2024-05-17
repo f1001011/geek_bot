@@ -13,6 +13,9 @@ class CacheKey{
     const REDIS_TELEGRAM_RED_POST_IP = 'bot_telegram:rob_red_repeat:%s';
     const REDIS_TELEGRAM_RED_POST_IP_TTL = 10;
 
+    const REDIS_TELEGRAM_CROWD_TG_USER = 'bot_telegram:crowd_tg_user:%s';//保存用户最新的消息和用户所在的群组，用于用户发红包
+
+
     const REDIS_TELEGRAM_RED_SEND_POST = 'bot_telegram:rob_red_send_post:%s';
     const REDIS_TELEGRAM_RED_SEND_POST_TTL = 5;
     //用户领取红包之后发送出去的消息回执的消息ID
