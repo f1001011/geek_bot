@@ -2,14 +2,11 @@
 
 namespace app\controller;
 
-use app\common\CacheKey;
-use app\model\UserModel;
 use app\service\BotJieLongRedEnvelopeService;
 use app\service\BotRedEnvelopeService;
 use app\service\BotRedSendService;
 use app\validate\CommonValidate;
 use think\exception\ValidateException;
-use think\facade\Cache;
 
 class ApiTelegramBotRedSend extends ApiBase
 {
@@ -33,10 +30,6 @@ class ApiTelegramBotRedSend extends ApiBase
         }
         $tgUser = json_decode($post['user'], true);
         $isTelegram = BotRedSendService::getInstance()->verifyUser($tgUser);
-//        if (!$isTelegram) {
-//            //traceLog($get,'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
-//            fail([], '不是telegram来源');
-//        }
         //获取是否注册了平台 和用户信息
         $userInfo = BotRedSendService::getInstance()->getUserInfo($tgUser['id']);
         success($userInfo);
@@ -55,16 +48,8 @@ class ApiTelegramBotRedSend extends ApiBase
         }
 
         //获取是否注册了平台 和用户信息
-        //$userInfo = BotRedSendService::getInstance()->getUserInfo();
         $userId = $this->request->user_info['id'];
-        $tgId = $this->request->user_info['tg_id'];
-//        $tgUser = Cache::get(sprintf(CacheKey::REDIS_TELEGRAM_CROWD_TG_USER, $tgId));
-//
-//        if (empty($tgUser)) {
-//            fail([], '请从群组发红包');
-//        }
-//
-//        $tgUser = json_decode($tgUser, true);
+
         $param['crowd'] = config('telegram.crowd');
 
         //判断是那种红包
