@@ -6,7 +6,6 @@ namespace app\controller;
 use app\facade\BotFacade;
 use app\service\BotCommonService;
 use app\service\BotCrowdListService;
-use app\service\BotJieLongRedEnvelopeService;
 use app\service\BotRedEnvelopeService;
 use app\service\BotRedSendService;
 use app\validate\CommonValidate;
@@ -53,16 +52,13 @@ class ApiTelegramBotRedEnvelope extends ApiBase
         //用户领取红包
         //需要发送 红包id查询红包数据
         $request = file_get_contents('php://input');
+
         $request = json_decode($request, true);
 
         //判断是否是新消息。机器人加入房间消息
         $this->botCrowd($request);
         //判断是否是系统命令 比如 start
-        if (empty($request) || empty($request['message']['text'])) {
-            // 消息体错误
-            $this->systemCommand($request);
-            return;
-        }
+        $this->systemCommand($request);
 
         if (empty($request) || empty($request['callback_query']['message'])) {
             // 消息体错误
@@ -81,14 +77,15 @@ class ApiTelegramBotRedEnvelope extends ApiBase
         traceLog(['message_id' => $messageId, 'crowd' => $crowd, 'command' => $command,], 'red-webhook-data');
 
         //判断是否是 发送红包命令
-        if ($command == 'my_red_send'){
-            //返回用户我要发红包按钮
-            BotCommonService::getInstance()->myRedSend($crowd,$tgUser,$messageId);
-            success();
-        }
+//        if ($command == 'my_red_send' || $command == '/my_red_send'){
+//            //返回用户我要发红包按钮
+//            BotCommonService::getInstance()->myRedSend($crowd,$tgUser,$messageId);
+//            success();
+//        }
 
         if ($command == 'start' || $command == '/start'){
             //返回主菜单
+            traceLog($request, '222222222222222222222222');
             BotRedSendService::getInstance()->send($crowd,$messageId);
             //BotCommonService::getInstance()->send($crowd,$tgUser,$messageId);
             success();
@@ -234,12 +231,12 @@ class ApiTelegramBotRedEnvelope extends ApiBase
 
         if (empty($request) || empty($request['message']['text'])) {
             // 消息体错误
-           return;
+            return;
         }
         //如果是系统命令
         $message = $request['message'];
         if (empty($message['chat']['id'])){
-         return ;
+            return ;
         }
         BotRedSendService::getInstance()->send($message['chat']['id']);
 

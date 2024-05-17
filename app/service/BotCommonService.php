@@ -67,9 +67,13 @@ class BotCommonService extends BaseService
     }
 
     //用户点击我要发红按钮，保存用户发红包信息。并且跳转到用户自己页面，返回用户可发红包点击按钮
-    public function myRedSend($crowd,$tgUser,$messageId){
-        //用户返回我要发红包按钮
-        return BotRedSendService::getInstance()->redSend($crowd,$tgUser,$messageId);
-    }
+//    public function myRedSend($crowd,$tgUser,$messageId){
+//        //用户返回我要发红包按钮
+//        return BotRedSendService::getInstance()->redSend($crowd,$tgUser,$messageId);
+//    }
+//
+//    public function mySend(){
+//
+//    }
 
 }

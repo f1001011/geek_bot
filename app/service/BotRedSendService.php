@@ -24,16 +24,16 @@ class BotRedSendService extends BaseService
         return true;
     }
 
-    public function verifyUser($get){
+    public function verifyUser($tgUser){
         //组装数据
-        $tgUser=[];
-        isset($get['id']) && $tgUser['id'] = $get['id'];
-        isset($get['first_name']) && $tgUser['first_name'] = $get['first_name'];
-        isset($get['last_name']) && $tgUser['last_name'] = $get['last_name'];
-        isset($get['username']) && $tgUser['username'] = $get['username'];
-        isset($get['auth_date']) && $tgUser['auth_date'] = $get['auth_date'];
-        isset($get['hash']) && $tgUser['hash'] = $get['hash'];
-        isset($get['photo_url']) && $tgUser['photo_url'] = $get['photo_url'];
+//        $tgUser=[];
+//        isset($get['id']) && $tgUser['id'] = $get['id'];
+//        isset($get['first_name']) && $tgUser['first_name'] = $get['first_name'];
+//        isset($get['last_name']) && $tgUser['last_name'] = $get['last_name'];
+//        isset($get['username']) && $tgUser['username'] = $get['username'];
+//        isset($get['auth_date']) && $tgUser['auth_date'] = $get['auth_date'];
+//        isset($get['hash']) && $tgUser['hash'] = $get['hash'];
+//        isset($get['photo_url']) && $tgUser['photo_url'] = $get['photo_url'];
         //不验证是否是 telegram 信息了
 //        try {
 //            $auth_data = $this->checkTelegramAuthorization($tgUser);
@@ -44,12 +44,17 @@ class BotRedSendService extends BaseService
 //            return false;
 //        }
         //查询redis 是否有信息
-        traceLog($get, '$get$get$get$get$get$get-error');
-        $tgUser = Cache::get(sprintf(CacheKey::REDIS_TELEGRAM_CROWD_TG_USER,$get['id']));
-        if ($tgUser){
-            return true;
-        }
-        return false;
+//        if (empty($_POST['user'])){
+//            return false;
+//        }
+//        $tgUser = json_decode($_POST['user'],true);
+//        traceLog($tgUser,'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
+        $tgUser = Cache::get(sprintf(CacheKey::REDIS_TELEGRAM_CROWD_TG_USER,$tgUser['id']));
+//        if ($tgUser){
+//            return true;
+//        }
+        $this->saveTelegramUserData($tgUser);
+        return true;
     }
 
     //获取tg用户账号
@@ -64,13 +69,13 @@ class BotRedSendService extends BaseService
         return $userInfo;
     }
 
-    public function redSend($crowd,$tgUser,$messageId){
-        $list = $this->myRedSend();
-        BotFacade::editMessageText($crowd, $messageId,'欢迎使用天天娱乐红包机器人', $list);
-        //BotFacade::sendPhotoEdit($crowd,  config("telegram.bot-binding-red-photo"),'欢迎使用天天娱乐红包机器人', $list,$messageId);
-        //保存用户redis信息
-        $tgUser['crowd'] = $crowd;
-        Cache::set(sprintf(CacheKey::REDIS_TELEGRAM_CROWD_TG_USER,$tgUser['id']),json_encode($tgUser),60*60*24*3);
-        return true;
-    }
+//    public function redSend($crowd,$tgUser,$messageId){
+//        $list = $this->myRedSend();
+//        BotFacade::editMessageText($crowd, $messageId,'欢迎使用天天娱乐红包机器人', $list);
+//        //BotFacade::sendPhotoEdit($crowd,  config("telegram.bot-binding-red-photo"),'欢迎使用天天娱乐红包机器人', $list,$messageId);
+//        //保存用户redis信息
+//        $tgUser['crowd'] = $crowd;
+//        Cache::set(sprintf(CacheKey::REDIS_TELEGRAM_CROWD_TG_USER,$tgUser['id']),json_encode($tgUser),60*60*24*30);
+//        return true;
+//    }
 }

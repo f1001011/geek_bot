@@ -19,11 +19,11 @@ trait TelegramTrait
             $string .= language('yqg');
         }
 
-        $loginUrl = [
-            'url' => config('telegram.bot-binding-active-url-one') . '?crowd=' . $crowd, // 你的登录页面 URL
-            'forward_text' => '登录成功', // 可选，用户登录成功后，你想让 bot 发送的消息文本
-            'request_write_access' => true // 可选，请求写访问权限
-        ];
+//        $loginUrl = [
+//            'url' => config('telegram.bot-binding-active-url-one') . '?crowd=' . $crowd, // 你的登录页面 URL
+//            'forward_text' => '登录成功', // 可选，用户登录成功后，你想让 bot 发送的消息文本
+//            'request_write_access' => true // 可选，请求写访问权限
+//        ];
 
         $one = [
             [
@@ -32,65 +32,58 @@ trait TelegramTrait
             ],
         ];
         return array_merge($one, $this->menu());
-//        return [
-//            [
-//                ['text' => $string, 'callback_data' => config('telegram.bot-binding-red-string-one') . $param],
-//                //['text' => language('jrpt'), 'login_url' => $loginUrl]
-//            ],
-//            [
-//                ['text' => '发送红包', 'url' => 'https://t.me/red_app_test_bot/myRedTestName?qwe=123'],
-//                ['text' => '游戏充值', 'url' => 'https://t.me/red_app_test_bot/myRedTestName?qwe=123'],
-//                ['text' => '提取奖金', 'url' => 'https://t.me/red_app_test_bot/myRedTestName?qwe=123'],
-//            ],
-//            [
-//                ['text' => '更多游戏', 'url' => 'https://t.me/red_app_test_bot/myRedTestName?qwe=123'],
-//                ['text' => '邀请好友', 'url' => 'https://t.me/red_app_test_bot/myRedTestName?qwe=123'],
-//                ['text' => '联系客服', 'url' => 'https://t.me/red_app_test_bot/myRedTestName?qwe=123'],
-//            ],
-//            [
-//                ['text' => '点击跳转', 'url' => 'https://t.me/red_app_test_bot/myRedTestName'. $param],
-//
-//            ]
-//        ];
     }
 
 
     //主动发送 群红包消息
     public function sendRrdBot(string $crowd = '')
     {
-        $loginUrl = [
-            //'url' => config('telegram.bot-binding-active-url-one').'?crowd='.$crowd, // 你的登录页面 URL
-            'url' => 'https://t.me/red_app_test_bot/myRedTestName?crowd=' . $crowd, // 你的登录页面 URL
-            'forward_text' => '登录成功', // 可选，用户登录成功后，你想让 bot 发送的消息文本
-            //'bot_username' => 'YourBotUsername', // 可选，你的 bot 的用户名
-            'request_write_access' => true // 可选，请求写访问权限
-        ];
+//        $loginUrl = [
+//            //'url' => config('telegram.bot-binding-active-url-one').'?crowd='.$crowd, // 你的登录页面 URL
+//            'url' => 'https://t.me/red_app_test_bot/myRedTestName?crowd=' . $crowd, // 你的登录页面 URL
+//            'forward_text' => '登录成功', // 可选，用户登录成功后，你想让 bot 发送的消息文本
+//            //'bot_username' => 'YourBotUsername', // 可选，你的 bot 的用户名
+//            'request_write_access' => true // 可选，请求写访问权限
+//        ];
 
-        $one = [
-            [
-                ['text' => language('jrpt'), 'login_url' => $loginUrl]
-            ],
-        ];
+//        $one = [
+//            [
+//                ['text' => language('jrpt'), 'login_url' => $loginUrl]
+//            ],
+//        ];
         //合并两个数组
-        return array_merge($one, $this->menu());
+        return $this->menu();
     }
 
-    public function myRedSend()
-    {
-        return [
-            [
-                ['text' => '我要发红包', 'url' => 'https://t.me/red_app_test_bot/myRedTestName'],
-                ['text' => '主菜单', 'callback_data' => '/start']
-            ]
-        ];
-    }
+//    public function myRedSend()
+//    {
+//        return [
+//            [
+//                //['text' => '我要发红包', 'url' => 'https://t.me/red_app_test_bot/myRedTestName'],
+//                ['text' => '我要发红包', 'url' => "https://t.me/get_red_bot"],
+//                ['text' => '主菜单', 'callback_data' => '/start']
+//            ]
+//        ];
+//    }
+
+    //用户点击 到和机器人主动聊天页面，主动发消息给用户让他发红包
+//    public function mySend(){
+//        // 1 跳转到用户页面
+//        return [
+//            [
+//
+//                ['text' => '我要发红包', 'url' => 'https://t.me/red_app_test_bot/myRedTestName'],
+//                ['text' => '主菜单', 'callback_data' => '/start']
+//            ]
+//        ];
+//    }
 
     protected function menu()
     {
         return [
             [
                 //['text' => '发送红包', 'url' => "https://t.me/$username"],
-                ['text' => '发送红包', 'callback_data' => "my_red_send"],
+                ['text' => '发送红包', 'url' => "https://t.me/red_app_test_bot/myRedTestName"],
                 ['text' => '游戏充值', 'url' => 'https://t.me/red_app_test_bot/myRedTestName?id=123321'],
                 ['text' => '提取奖金', 'url' => 'https://t.me/red_app_test_bot/myRedTestName?id=123321'],
             ],

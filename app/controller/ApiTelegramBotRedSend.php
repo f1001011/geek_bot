@@ -27,14 +27,18 @@ class ApiTelegramBotRedSend extends ApiBase
     //验证用户信息是否正确
     public function verifyUser()
     {
-        $get = $this->request->get();
-        $isTelegram = BotRedSendService::getInstance()->verifyUser($get);
-        if (!$isTelegram) {
-            //traceLog($get,'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
+        $post = $_POST;
+        if (empty($post['user'])) {
             fail([], '不是telegram来源');
         }
+        $tgUser = json_decode($post['user'], true);
+        $isTelegram = BotRedSendService::getInstance()->verifyUser($tgUser);
+//        if (!$isTelegram) {
+//            //traceLog($get,'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
+//            fail([], '不是telegram来源');
+//        }
         //获取是否注册了平台 和用户信息
-        $userInfo = BotRedSendService::getInstance()->getUserInfo($get['id']);
+        $userInfo = BotRedSendService::getInstance()->getUserInfo($tgUser['id']);
         success($userInfo);
     }
 
@@ -54,14 +58,14 @@ class ApiTelegramBotRedSend extends ApiBase
         //$userInfo = BotRedSendService::getInstance()->getUserInfo();
         $userId = $this->request->user_info['id'];
         $tgId = $this->request->user_info['tg_id'];
-        $tgUser = Cache::get(sprintf(CacheKey::REDIS_TELEGRAM_CROWD_TG_USER,$tgId));
-
-        if (empty($tgUser)){
-            fail([], '请从群组发红包');
-        }
-
-        $tgUser = json_decode($tgUser,true);
-        $param['crowd'] = $tgUser['crowd'];
+//        $tgUser = Cache::get(sprintf(CacheKey::REDIS_TELEGRAM_CROWD_TG_USER, $tgId));
+//
+//        if (empty($tgUser)) {
+//            fail([], '请从群组发红包');
+//        }
+//
+//        $tgUser = json_decode($tgUser, true);
+        $param['crowd'] = config('telegram.crowd');
 
         //判断是那种红包
         switch ($param['lottery_type']) {
@@ -75,7 +79,7 @@ class ApiTelegramBotRedSend extends ApiBase
                 $param['num'] = 1;
 
                 $userInfo = BotRedEnvelopeService::getInstance()->getTgUser($param['people']);
-                if (empty($userInfo)){
+                if (empty($userInfo)) {
                     fail([], '用户未参加平台活动');
                 }
                 $data = BotRedEnvelopeService::getInstance()->createSend($param['money'], $param['people'], $param['num'], $param['crowd'], date('Y-m-d H:i:s'), $userId, $tgId, $param['expire_at'] ?? 0);
