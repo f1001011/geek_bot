@@ -143,11 +143,15 @@ class BotRedMineService extends BaseService
         //验证红包领取信息
         list($dataOne, $activityOn, $toMoney, $toJoinNum) = $this->verifyRedQualification($redId, $callbackQueryId);
 
-
         //抢炸雷红包需要押金，判断用户是否金额足够
         $depositMoney = $dataOne['money'] * config('telegram.bot-binding-red-zd-rate');//需要赔偿的钱
         if ($dataOne['lottery_type'] == LotteryJoinModel::RED_TYPE_DL) {
             $this->verifyUserBalance($userInfo['balance'], $depositMoney, $callbackQueryId);
+        }
+
+        if ($dataOne['tg_id'] == $tgId){
+            BotFacade::SendCallbackQuery($callbackQueryId, '本人红包不可领取');
+            return fail([], '本人红包不可领取');
         }
 
         //3 判断用户是否已经领取了 后期可改redis
@@ -162,7 +166,7 @@ class BotRedMineService extends BaseService
         $centre = $this->isLastDigitSix($amount,$dataOne['red_password']);
         if ($centre){
             //中炸雷红包，用户赔偿 金额  本次获得的金额 - 需要赔偿的押金的2倍 负数
-            $userMoney = $amount - $depositMoney;
+            $userMoney = $depositMoney - $amount;
         }
 
         traceLog("----红包ID {$redId} 用户 {$tgId} 领取金额{$amount} 赔偿 {$userMoney} -----");
@@ -197,9 +201,9 @@ class BotRedMineService extends BaseService
             'money' => $amount,
             'user_name' => $userInfo['username'],
             'user_start_money' => $userInfo['balance'] ?? 0,
-            'user_end_money' => $userInfo['balance'] + $amount + $userMoney,
+            'user_end_money' => $userInfo['balance'] + $amount - $depositMoney,
             'lottery_type' => $dataOne['lottery_type'],
-            'user_repay' => abs($userMoney),
+            'user_repay' => $depositMoney,
         ];
 
         Db::startTrans();
@@ -208,7 +212,7 @@ class BotRedMineService extends BaseService
             //插入领取信息
             $joinUserId = LotteryJoinUserModel::getInstance()->setInsert($insert);
             //2 执行修改用户钱包
-            UserModel::getInstance()->incOrDec($userInfo['id'], $amount + $userMoney);
+            UserModel::getInstance()->incOrDec($userInfo['id'], $amount - $depositMoney);
 
             //3 执行写入红包日志
             //MoneyLogModel::getInstance()->setInsert([]);
@@ -217,12 +221,12 @@ class BotRedMineService extends BaseService
                 'tg_id' => $userInfo['tg_id'],
                 'user_id' => $userInfo['id'],
                 'start_money' => $userInfo['balance'],
-                'end_money' => $userInfo['balance'] + $amount + $userMoney,
-                'change_money' => abs($amount + $userMoney),
+                'end_money' => $userInfo['balance'] + $amount - $depositMoney,
+                'change_money' => $amount - $depositMoney,
                 'water_money' => 0,
                 'to_source_id' => $joinUserId,
                 'source_id' => $redId,
-                'remarks' => '用户领取红包金额:' . $amount.',用户赔偿金额：'.abs($userMoney).',实际变动索赔：'.abs($amount + $userMoney),
+                'remarks' => '用户领取红包金额:' . $amount.',赔偿金额：'.$depositMoney.',实际变动索赔：'.($depositMoney-$amount),
                 'type' => 2,
                 'change_type' => $dataOne['lottery_type'],
                 'piping' => $dataOne['crowd'],
@@ -236,8 +240,29 @@ class BotRedMineService extends BaseService
 
             //更新消息体
             $str = $this->zdCopywriting($dataOne['username'], $amount);
-            if (isset($lotteryUpdateData['status']) && $lotteryUpdateData['status'] != 1){
-                $str =$this->zdCopywritingEdit($dataOne['money'],$redId,$dataOne['username'],$dataOne['red_password']);
+            if (isset($lotteryUpdate['status']) && $lotteryUpdate['status'] != 1){
+                $str = $this->zdCopywritingEdit($dataOne['money'],$redId,$dataOne['username'],$dataOne['red_password']);
+            }
+            //如果用户中雷了，给包主添加余额，给包主写日志
+            if ($userMoney != 0){
+                //获取包主余额
+                $bzData = UserModel::getInstance()->getDataOne(['id'=>$dataOne['user_id']]);
+                MoneyLogModel::getInstance()->setInsert([
+                    'username' => $bzData['username'],
+                    'tg_id' => $bzData['tg_id'],
+                    'user_id' => $bzData['id'],
+                    'start_money' => $bzData['balance'],
+                    'end_money' => $bzData['balance'] + $depositMoney,
+                    'change_money' => $depositMoney,
+                    'water_money' => 0,
+                    'to_source_id' => $joinUserId,
+                    'source_id' => $redId,
+                    'remarks' => '用户tgId：'.$userInfo['tg_id'].',中雷号：'.$dataOne['red_password'].',中奖：'.$amount.',赔偿：'.$depositMoney,
+                    'type' => 6,
+                    'change_type' => $dataOne['lottery_type'],
+                    'piping' => $dataOne['crowd'],
+                ]);
+                UserModel::getInstance()->incOrDec($dataOne['user_id'], $depositMoney);
             }
             BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'], $str, $list);
 

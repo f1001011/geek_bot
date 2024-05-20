@@ -142,27 +142,27 @@ trait TelegramTrait
         //1 获取用户发出的金额
         //2 获取用户赔了多少钱
         $centreMoney = LotteryJoinUserModel::getInstance()->getCountRepay($redId);
-        language('flgzsordlendy',$centreMoney-$money,$money,);
+        $centreString = language('flgzsordlendy',$centreMoney,$money,$centreMoney-$money);
         //组装中奖人
         //获取中奖人名单
         //查询redis是否存在领取信息，不存在查询数据库
         $userList = Cache::SMEMBERS(sprintf(CacheKey::REDIS_TELEGRAM_RED_RECEIVE_USER, $redId));
         $str = '';
+
         if (!empty($userList)) {
             foreach ($userList as $Key => $value) {
                 $value = @json_decode($value, true);
                 $str.= language('flgzsordlendxq',$value['user_repay'] == 0 ? '💵':'💥',$value['money'],$value['user_name']);
             }
-            return $string . $str;
+            return $string . $str .$centreString;
         }
-
 
         //无 redis 信息时
         $userList = LotteryJoinUserModel::getInstance()->getDataList(['lottery_id' => $redId]);
         foreach ($userList as $Key => $value) {
             $str.= language('flgzsordlendxq',$value['user_repay'] == 0 ? '💵':'💥',$value['money'],$value['user_name']);
         }
-        return $string.$str;
+        return $string.$str .$centreString;
     }
 
 

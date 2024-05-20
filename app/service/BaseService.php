@@ -109,7 +109,7 @@ class BaseService
         return $amount;
     }
 
-    public function calculateRedPacketAmount($minAmount, $maxAmount, $excludeLastDigits = [7, 8, 9])
+    public function calculateRedPacketAmount($minAmount, $maxAmount, $excludeLastDigits = [])
     {
 
         // 转换为分为单位进行计算，以避免浮点数精度问题

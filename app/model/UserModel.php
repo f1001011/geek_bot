@@ -47,7 +47,7 @@ class UserModel extends BaseModel
         if ($int > 0) {
             return $this->where('id', $id)->inc('balance', $int)->update();
         }
-        return $this->where('id', $id)->dec('balance', $int)->update();
+        return $this->where('id', $id)->dec('balance', abs($int))->update();
     }
 
     public function dec($id, $int)

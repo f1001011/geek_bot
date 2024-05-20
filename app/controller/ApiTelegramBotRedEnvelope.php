@@ -49,7 +49,7 @@ class ApiTelegramBotRedEnvelope extends ApiBase
         //用户领取红包
         //需要发送 红包id查询红包数据
         $request = file_get_contents('php://input');
-
+        traceLog($request, 'red-webhook-start----------------');
         $request = json_decode($request, true);
 
         //判断是否是新消息。机器人加入房间消息

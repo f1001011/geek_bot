@@ -20,5 +20,5 @@ return [
     'bot-binding-red-photo-ist'=>'static/jl.jpg',//龙头红包
     'bot-binding-red-service-charge'=>env('bot.bot_charge', 0.05),//红包服务费
     'bot-binding-red-zd-rate'=>2,//地雷红包倍数
-    'bot-binding-red-no-appear'=>[0,1,2],//红雷红包最后位数 不会出现的名单
+    'bot-binding-red-no-appear'=>[],//红雷红包最后位数 不会出现的名单
 ];
