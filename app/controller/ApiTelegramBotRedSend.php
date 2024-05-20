@@ -74,10 +74,10 @@ class ApiTelegramBotRedSend extends ApiBase
                 $data = BotJieLongRedEnvelopeService::getInstance()->createSend($param['crowd'], $param['money'], $param['num'], $userId, $tgId, date('Y-m-d H:i:s'), $param['expire_at'] ?? 0);
                 break;
             case 3:
-                if ($param['password'] <= 0 ){
+                if (!isset($param['password']) || $param['password'] < 0 || $param['password'] >9){
                     fail([], '输入炸雷红包密码');
                 }
-                $data = BotRedMineService::getInstance()->createSend($param['crowd'], $param['money'], $param['password'], $userId, $tgId, date('Y-m-d H:i:s'), $param['expire_at'] ?? 0);
+                $data = BotRedMineService::getInstance()->createSend($param['money'], $param['password'], $param['num'],$param['crowd'], date('Y-m-d H:i:s'), $userId, $tgId,$param['expire_at'] ?? 0);
                 break;
         }
 

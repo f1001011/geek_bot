@@ -5,6 +5,7 @@ namespace app\command\service;
 use app\model\LotteryJoinModel;
 use app\service\BotJieLongRedEnvelopeService;
 use app\service\BotRedEnvelopeService;
+use app\service\BotRedMineService;
 
 class RedAutoSendService extends BaseService
 {
@@ -30,6 +31,10 @@ class RedAutoSendService extends BaseService
 
             if ($value['lottery_type'] == LotteryJoinModel::RED_TYPE_JL){
                 BotJieLongRedEnvelopeService::getInstance()->setSend($value['id']);
+            }
+
+            if ($value['lottery_type'] == LotteryJoinModel::RED_TYPE_DL){
+                BotRedMineService::getInstance()->setSend($value['id']);
             }
         }
 

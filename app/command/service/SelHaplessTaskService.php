@@ -59,7 +59,7 @@ class SelHaplessTaskService extends BaseService
         }
         if (empty($haplessUserList)){
             //LotteryJoinModel::getInstance()->updateAll($ListUpdate);
-            $output->writeln('selhaplesstask 没有倒霉蛋，跟新数据');
+            //$output->writeln('selhaplesstask 没有倒霉蛋，跟新数据');
         }
 
         //有倒霉蛋

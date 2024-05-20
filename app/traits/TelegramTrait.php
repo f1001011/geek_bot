@@ -12,15 +12,15 @@ use think\facade\Cache;
 trait TelegramTrait
 {
     //管理员发送红包
-    public function sendRrdBotRoot(int $startNum = 0, int $endNum = 0, string $param = '', string $crowd = '',$mine='')
+    public function sendRrdBotRoot(int $startNum = 0, int $endNum = 0, string $param = '', string $crowd = '', $mine = '',$status = false)
     {
         $string = "($endNum/$startNum)";
         if ($startNum <= $endNum) {
             $string .= language('yqg');
         }
-        if (!empty($mine)){
+        if (!empty($mine)) {
             //雷号码
-            $string.= '💣 '.$mine;
+            $string .= '💣 ' . $mine;
         }
 
 //        $loginUrl = [
@@ -28,6 +28,9 @@ trait TelegramTrait
 //            'forward_text' => '登录成功', // 可选，用户登录成功后，你想让 bot 发送的消息文本
 //            'request_write_access' => true // 可选，请求写访问权限
 //        ];
+        if ($status){
+            $string .=language('yjs');
+        }
 
         $one = [
             [
@@ -127,6 +130,42 @@ trait TelegramTrait
         return $string;
     }
 
+    //地雷红包用户完成过后文案 结束
+    public function zdCopywritingEdit($money = 0, $redId = 0, $username = '', $number = 0)
+    {
+        $string = '🧧' . language('title-hb') . '🧧' . "\n" . language('flgzsordlend',
+                "<b>$username</b>",
+                "{$money}U",
+                config('telegram.bot-binding-red-zd-rate'), $number
+            );
+        //组装中奖盈亏
+        //1 获取用户发出的金额
+        //2 获取用户赔了多少钱
+        $centreMoney = LotteryJoinUserModel::getInstance()->getCountRepay($redId);
+        language('flgzsordlendy',$centreMoney-$money,$money,);
+        //组装中奖人
+        //获取中奖人名单
+        //查询redis是否存在领取信息，不存在查询数据库
+        $userList = Cache::SMEMBERS(sprintf(CacheKey::REDIS_TELEGRAM_RED_RECEIVE_USER, $redId));
+        $str = '';
+        if (!empty($userList)) {
+            foreach ($userList as $Key => $value) {
+                $value = @json_decode($value, true);
+                $str.= language('flgzsordlendxq',$value['user_repay'] == 0 ? '💵':'💥',$value['money'],$value['user_name']);
+            }
+            return $string . $str;
+        }
+
+
+        //无 redis 信息时
+        $userList = LotteryJoinUserModel::getInstance()->getDataList(['lottery_id' => $redId]);
+        foreach ($userList as $Key => $value) {
+            $str.= language('flgzsordlendxq',$value['user_repay'] == 0 ? '💵':'💥',$value['money'],$value['user_name']);
+        }
+        return $string.$str;
+    }
+
+
     //用户领取红包  发起抢红包信息 telegram 展示
     public function queryPhotoEdit($money, $toMoney, $redId = 0, $username = '', $userInfo = [], $false = true)
     {
@@ -193,6 +232,7 @@ trait TelegramTrait
         }
         return $string . $str;
     }
+
 
     //验证登录用户是否正确
     function checkTelegramAuthorization($auth_data)

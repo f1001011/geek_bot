@@ -4,13 +4,15 @@ namespace app\command\service;
 
 use app\model\LotteryJoinModel;
 use app\model\LotteryJoinUserModel;
+use app\service\BotCommonService;
 
 class RedAutoCloseService extends BaseService
 {
 
-    public function start(){
+    public function start()
+    {
         //函数执行完。删除指定的key
-        register_shutdown_function(function() {
+        register_shutdown_function(function () {
             $this->delStatus('redautoclose');
         });
 
@@ -21,9 +23,12 @@ class RedAutoCloseService extends BaseService
         }
         //遍历数据。修改状态
         $updateDataList = [];
+        $UpdateQueryList = [];
+        //返回 未领取完红包结束并发送结束状态
         //需要修改状态的数据
         foreach ($getDataList as $key => $value) {
             $update = [];
+            $query = [];
             //$update = $this->dx($value);
 //            //判断红包类型 定向或者福利红包
             if ($value['lottery_type'] == LotteryJoinModel::RED_TYPE_FL || $value['lottery_type'] == LotteryJoinModel::RED_TYPE_DX || $value['lottery_type'] == LotteryJoinModel::RED_TYPE_DL) {
@@ -34,10 +39,14 @@ class RedAutoCloseService extends BaseService
             }
             if (!empty($update)) {
                 $updateDataList[] = $update;
+                $UpdateQueryList[] = $value;
             }
         }
 
+
+
         LotteryJoinModel::getInstance()->updateAll($updateDataList);
+        BotCommonService::getInstance()->setQuery($UpdateQueryList);
     }
 
     protected function dx($value)

@@ -17,15 +17,14 @@ use think\facade\Cache;
 use think\facade\Db;
 use think\facade\Queue;
 
-class BotRedEnvelopeService extends BaseService
+class BotRedMineService extends BaseService
 {
 
     use TelegramTrait;
     use RedBotTrait;
 
-    //福利红包，定向红包
-    //创建红包发送消息 创建定向红包和福利红包
-    public function createSend(float $money, string $people, int $joinNum, string $crowd, $startAt, string $userId, string $tgId, int $expireAt = 600)
+    //炸雷红包
+    public function createSend(float $money, string $password, int $joinNum, string $crowd, $startAt, string $userId, string $tgId, int $expireAt = 600)
     {
         $expireAt = $expireAt > 0 ? $expireAt : 600;  //默认10分钟停止
         empty($startAt) && $startAt = date('Y-m-d H:i:s');
@@ -45,19 +44,14 @@ class BotRedEnvelopeService extends BaseService
             'start_at' => $startAt,
             'water_money' => $waterMoney,
             'in_join_user' => '',
-            'lottery_type' => LotteryJoinModel::RED_TYPE_FL,
+            'lottery_type' => LotteryJoinModel::RED_TYPE_DL,
+            'red_password'=>$password,
+            'is_status'=>LotteryJoinModel::IS__STATUS_END_JL,
         ];
 
-        if (!empty($people)) {
-            $insert['in_join_user'] = $people;
-            $insert['lottery_type'] = LotteryJoinModel::RED_TYPE_DX;
-        }
-        //判断用户钱包钱是否足够
-        if ($userId <= 0) {
-            return fail([], '发送用户ID不存在');
-        }
         //查询用户的余额是否足够
         $userInfo = UserModel::getInstance()->getDataOne(['id' => $userId]);
+
         if (empty($userInfo)) {
             return fail([], '用户不存在');
         }
@@ -116,18 +110,18 @@ class BotRedEnvelopeService extends BaseService
 
         try {
             //获取标签列表
-            $list = $this->sendRrdBotRoot($redInfo['join_num'], 0, $redId,$redInfo['crowd']);
+            $list = $this->sendRrdBotRoot($redInfo['join_num'], 0, $redId,$redInfo['crowd'],$redInfo['red_password']);
             //发送消息到 telegram 开始抽奖
-            $res = BotFacade::sendPhoto($redInfo['crowd'], $photoUrl, $this->copywriting($redInfo['money'], $redInfo['in_join_user'],$redInfo['username']), $list);
+            $res = BotFacade::sendPhoto($redInfo['crowd'], $photoUrl, $this->zdCopywriting($redInfo['money'],$redInfo['username']), $list);
             if (!$res) {
-                traceLog($res, 'dx-fl-red-sendStartBotRoot-curl-error');
+                traceLog($res, 'dx-fl-red-mine-curl-error');
                 throw new \think\exception\HttpException(404, 'curl 失败');
             }
             $request = json_decode($res, true);
             //修改红包数据
             LotteryJoinModel::getInstance()->setUpdate(['id' => $redInfo['id']], ['message_id' => $request['result']['message_id'], 'status' => LotteryJoinModel::STATUS_START]);
         } catch (\Exception $e) {
-            traceLog($e->getMessage(), 'setSend-error');
+            traceLog($e->getMessage(), 'setSend-mine-error');
             return fail([], $e->getMessage());
         }
         return success();
@@ -149,27 +143,34 @@ class BotRedEnvelopeService extends BaseService
         //验证红包领取信息
         list($dataOne, $activityOn, $toMoney, $toJoinNum) = $this->verifyRedQualification($redId, $callbackQueryId);
 
-        //2 确认是否有预设人
-        $inJoinUser = $this->getInJoinUserList($dataOne['in_join_user']);
-        //如果不存在的时候，说明当前没有固定用户 抢红包，把当前用户丢进红包中
-        if (empty($inJoinUser)) {
-            $inJoinUser[] = $userInfo['tg_id']; // 如果是 tgid 就换tgid。。
-        }
-        // 如果是 tgid 就换tgid。。
-        if (!in_array($userInfo['tg_id'], $inJoinUser)) {
-            BotFacade::SendCallbackQuery($callbackQueryId, '仅指定用户可抢');
-            return fail([], '用户不具备抢红包资格');
+
+        //抢炸雷红包需要押金，判断用户是否金额足够
+        $depositMoney = $dataOne['money'] * config('telegram.bot-binding-red-zd-rate');//需要赔偿的钱
+        if ($dataOne['lottery_type'] == LotteryJoinModel::RED_TYPE_DL) {
+            $this->verifyUserBalance($userInfo['balance'], $depositMoney, $callbackQueryId);
         }
 
         //3 判断用户是否已经领取了 后期可改redis
         $this->userIsReceive($tgId, $redId, $activityOn, $callbackQueryId);
 
         //4 计算用户获得金额
-        $amount = $this->grabNextRedPack($toMoney, $toJoinNum);
-        traceLog("红包ID {$redId} 用户 {$tgId} 领取金额{$amount}");
+        $amount = $this->grabNextRedPackDL($toMoney, $toJoinNum);
+
+        //如果用户的位数是炸雷红包的最后一位，扣除用户  原红包金额的 2倍
+        $userMoney = 0;//用户需要增加的金额 为负数就是减少
+
+        $centre = $this->isLastDigitSix($amount,$dataOne['red_password']);
+        if ($centre){
+            //中炸雷红包，用户赔偿 金额  本次获得的金额 - 需要赔偿的押金的2倍 负数
+            $userMoney = $amount - $depositMoney;
+        }
+
+        traceLog("----红包ID {$redId} 用户 {$tgId} 领取金额{$amount} 赔偿 {$userMoney} -----");
+
         //5 计算已经领取的金额和已经领取了多少人
         $stopMoney = $amount + $dataOne['to_money'];//总领取了多少金额
         $stopJoinNum = $dataOne['to_join_num'] + 1;//总领取了多少人
+
 
         //######如果是最后一个用户参数抽奖了。抽奖状态变更为已结束 start_at 有人抢的时候，开始时间跟新为当前时间
         $lotteryUpdate = [
@@ -179,6 +180,7 @@ class BotRedEnvelopeService extends BaseService
             'start_at' => date('Y-m-d H:i:s'),
             'join_user' => $dataOne['join_user'] . $userInfo['id'] . ','
         ];
+
         if ($toJoinNum <= 1) {
             $lotteryUpdate['status'] = LotteryJoinModel::STATUS_END_ALL;
         }
@@ -195,16 +197,18 @@ class BotRedEnvelopeService extends BaseService
             'money' => $amount,
             'user_name' => $userInfo['username'],
             'user_start_money' => $userInfo['balance'] ?? 0,
-            'user_end_money' => $userInfo['balance'] + $amount,
+            'user_end_money' => $userInfo['balance'] + $amount + $userMoney,
             'lottery_type' => $dataOne['lottery_type'],
+            'user_repay' => abs($userMoney),
         ];
+
         Db::startTrans();
         try {
             LotteryJoinModel::getInstance()->setUpdate(['id' => $redId, 'activity_on' => $activityOn], $lotteryUpdate);
             //插入领取信息
             $joinUserId = LotteryJoinUserModel::getInstance()->setInsert($insert);
             //2 执行修改用户钱包
-            UserModel::where('id', $userInfo['id'])->inc('balance', $amount)->update();
+            UserModel::getInstance()->incOrDec($userInfo['id'], $amount + $userMoney);
 
             //3 执行写入红包日志
             //MoneyLogModel::getInstance()->setInsert([]);
@@ -213,12 +217,12 @@ class BotRedEnvelopeService extends BaseService
                 'tg_id' => $userInfo['tg_id'],
                 'user_id' => $userInfo['id'],
                 'start_money' => $userInfo['balance'],
-                'end_money' => $userInfo['balance'] + $amount,
-                'change_money' => $amount,
+                'end_money' => $userInfo['balance'] + $amount + $userMoney,
+                'change_money' => abs($amount + $userMoney),
                 'water_money' => 0,
                 'to_source_id' => $joinUserId,
                 'source_id' => $redId,
-                'remarks' => '用户领取红包金额:' . $amount,
+                'remarks' => '用户领取红包金额:' . $amount.',用户赔偿金额：'.abs($userMoney).',实际变动索赔：'.abs($amount + $userMoney),
                 'type' => 2,
                 'change_type' => $dataOne['lottery_type'],
                 'piping' => $dataOne['crowd'],
@@ -226,15 +230,21 @@ class BotRedEnvelopeService extends BaseService
             // 更多的数据库操作...
             //返回中奖金额
             //发送消息到 telegram 中奖消息  跟新中奖消息
-            $list = $this->sendRrdBotRoot($dataOne['join_num'], $lotteryUpdate['to_join_num'], $redId,$dataOne['crowd']);
-            $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate);
+            //$list = $this->sendRrdBotRoot($dataOne['join_num'], $lotteryUpdate['to_join_num'], $redId,$dataOne['crowd']);
+            $list = $this->sendRrdBotRoot($dataOne['join_num'], $lotteryUpdate['to_join_num'], $redId,$dataOne['crowd'],$dataOne['red_password']);
+            $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate,$userMoney);
 
             //更新消息体
-            BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'], $this->queryPhotoEdit($dataOne['money'], $amount, $redId,$dataOne['username'], $userInfo), $list);
+            $str = $this->zdCopywriting($dataOne['username'], $amount);
+            if (isset($lotteryUpdateData['status']) && $lotteryUpdateData['status'] != 1){
+                $str =$this->zdCopywritingEdit($dataOne['money'],$redId,$dataOne['username'],$dataOne['red_password']);
+            }
+            BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'], $str, $list);
+
             Db::commit();
         } catch (\Exception $e) {
             Db::rollback();
-            traceLog($e->getMessage(), "福利-定向用户抢红包 {$redId} 结算错误");
+            traceLog($e->getMessage(), "福利-地雷 {$redId} 结算错误");
             // 处理异常或返回错误
             return 0;
         }
@@ -242,94 +252,10 @@ class BotRedEnvelopeService extends BaseService
     }
 
 
-    //管理员创建发送红包
-//    public function createSendStartBotRoot(float $money, string $people, int $joinNum, string $crowd, $startAt, int $expireAt = 0)
-//    {
-//        $insert = [
-//            'tg_id' => 0,
-//            'crowd' => $crowd,
-//            'status' => 1,
-//            'activity_on' => getRedEnvelopeOn(),
-//            'money' => $money,
-//            'join_num' => $joinNum,
-//            'to_join_num' => 0,
-//            'expire_at' => $expireAt,
-//            'start_at' => $startAt,
-//            'in_join_user' => '',
-//            'lottery_type' => 0,
-//        ];
-//
-//        if (!empty($people)) {
-//            $insert['in_join_user'] = $people;
-//            $insert['lottery_type'] = 1;
-//        }
-//        return $this->sendStartBotRoot($insert);
-//    }
-//
-//    //开始发送红包
-//    public function sendStartBotRoot(array $insert = [])
-//    {
-//        $photoUrl = public_path() . config('telegram.bot-binding-red-photo-one');
-//        if (!file_exists($photoUrl)) {
-//            return false;
-//        }
-//
-//        // 启动事务
-//        Db::startTrans();
-//        try {
-//            //发送红包 //写入数据成功
-//            if (!$insertId = LotteryJoinModel::getInstance()->setInsert($insert)) {
-//                return false;
-//            }
-//            //获取标签列表
-//            $list = $this->sendRrdBotRoot($insert['join_num'], 0, $insertId,$insert['crowd']);
-//            //发送消息到 telegram 开始抽奖
-//            $res = BotFacade::sendPhoto($insert['crowd'], $photoUrl, $this->copywriting($insert['money'], $insert['in_join_user'],$insert['username']), $list);
-//            traceLog($res, 'red-sendStartBotRoot-curl-ok');
-//            if (!$res) {
-//                traceLog($res, 'red-sendStartBotRoot-curl-error');
-//                throw new \think\exception\HttpException(404, 'curl 失败');
-//            }
-//            $request = json_decode($res, true);
-//            //修改红包数据
-//            LotteryJoinModel::getInstance()->setUpdate(['id' => $insertId], ['message_id' => $request['result']['message_id']]);
-//            // 提交事务
-//            Db::commit();
-//        } catch (\Exception $e) {
-//            // 回滚事务
-//            Db::rollback();
-//            return false;
-//        }
-//        return true;
-//    }
-
-    //计算中奖用户
-    private function getInJoinUserList($data = '')
-    {
-        if (empty($data)) {
-            return [];
-        }
-        if (!strpos($data, ',')) {
-            $data .= ',';
-        }
-
-        $inJoinUserList = explode(",", $data);
-
-        if (empty($inJoinUserList)) {
-            return [];
-        }
-        $inJoinUserList = array_filter($inJoinUserList);
-        if (!empty($inJoinUserList)) {
-            return $inJoinUserList;
-        }
-        return [];
-    }
-
-
     //没领取完的红包结束状态，更新 telegram 消息
     public function setEndQuery($data = []){
         //判断游戏类型
-        $list = $this->sendRrdBotRoot($data['join_num'], $data['to_join_num'], $data['id'],$data['crowd'],'',true);
+        $list = $this->sendRrdBotRoot($data['join_num'], $data['to_join_num'], $data['id'],$data['crowd'],$data['red_password'],true);
         BotFacade::editMessageCaption($data['crowd'], $data['message_id'], '', $list);
         return true;
     }

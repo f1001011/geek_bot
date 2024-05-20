@@ -275,11 +275,13 @@ class TelegramBotBin extends BaseFacade
         $postFields = [
             'chat_id' => $chatId,
             'message_id' => $messageId,
-            'caption' => $message,
             'parse_mode' => 'HTML'
         ];
         if (!empty($keyboard)) {
             $postFields['reply_markup'] = json_encode(['inline_keyboard' => $keyboard]);
+        }
+        if (!empty($message)) {
+            $postFields['caption'] = $message;
         }
 
         $ch = curl_init($editMessageUrl);

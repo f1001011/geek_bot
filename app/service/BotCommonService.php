@@ -34,6 +34,10 @@ class BotCommonService extends BaseService
             BotJieLongRedEnvelopeService::getInstance()->getRedBotAnalysis($redId, $tgId, $callbackQueryId, $tgUser);
         }
 
+        if ($data['lottery_type'] == LotteryJoinModel::RED_TYPE_DL){
+            BotRedMineService::getInstance()->getRedBotAnalysis($redId, $tgId, $callbackQueryId, $tgUser);
+        }
+
     }
 
 
@@ -59,6 +63,24 @@ class BotCommonService extends BaseService
         }
 
         return [$redId];
+    }
+
+    public function setQuery($data = []){
+        foreach ($data as $key=>$value){
+            //解析红包类型
+            if ($value['lottery_type'] == LotteryJoinModel::RED_TYPE_FL || $value['lottery_type'] == LotteryJoinModel::RED_TYPE_DX){
+                BotRedEnvelopeService::getInstance()->setEndQuery($value);
+            }
+
+            if ($value['lottery_type'] == LotteryJoinModel::RED_TYPE_JL){
+                BotJieLongRedEnvelopeService::getInstance()->setEndQuery($value);
+            }
+
+            if ($value['lottery_type'] == LotteryJoinModel::RED_TYPE_DL){
+                BotRedMineService::getInstance()->setEndQuery($value);
+            }
+        }
+       return true;
     }
 
 }

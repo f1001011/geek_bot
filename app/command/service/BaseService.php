@@ -41,4 +41,10 @@ class BaseService
         Cache::delete($cname);
         return true;
     }
+
+
+    //红包结束的消息
+    public function endQuery(){
+
+    }
 }

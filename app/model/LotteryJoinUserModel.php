@@ -37,4 +37,9 @@ class LotteryJoinUserModel extends BaseModel
         return $this->insertGetId($data);
     }
 
+    //统计用户赔了的钱
+    public function getCountRepay($id){
+        return $this->where('lottery_id',$id)->sum('user_repay');
+    }
+
 }
