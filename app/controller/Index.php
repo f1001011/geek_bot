@@ -1,6 +1,6 @@
 <?php
-namespace app\controller;
 
+namespace app\controller;
 
 
 use app\facade\BotFacade;
@@ -15,6 +15,24 @@ class Index extends ApiBase
 
     public function index()
     {
+        $json = '{"id":5814792502,"first_name":"doc","last_name":"i","username":"ohMyGodMagicIsDestory","language_code":"zh-hans","allows_write_to_pm":true}';
+        $auth_data = [
+            'chat_instance' => 7341815458717890001,
+            'chat_type' => 'sender',
+            'auth_date' => 1715912405,
+            'hash' => '96482bb91d2cadf025b3761af88a83af9ed652d59f7408f7c88b9b7e444666e0',
+            'user' =>$json
+        ];
+
+        foreach ($auth_data as $key => $value) {
+            $data_check_arr[] = $key . '=' . $value;
+        }
+
+        sort($data_check_arr);
+      $data_check_string = implode("&", $data_check_arr);
+        dump(($data_check_string));
+        dump(md5($data_check_string));
+        die;
 
 //        $key = 'sadewqewesdq12331234231111111111111111111111111111111111111111';
 //       $b=  decryptToken(21563351653211);
@@ -34,40 +52,32 @@ class Index extends ApiBase
 //
 
 
-
-
-
-
-
-
-
-
-
-
-
-
         die;
-        $str = BotJieLongRedEnvelopeService::getInstance()->jlCopywriting(100,'0.2',5,'你好');
-        dump($str);die;
+        $str = BotJieLongRedEnvelopeService::getInstance()->jlCopywriting(100, '0.2', 5, '你好');
+        dump($str);
+        die;
         $param = $this->request->only(['lang']);
 
         try {
             validate(CommonValidate::class)->scene('edit')->check($param);
         } catch (ValidateException $e) {
-            fail([],$e->getError());
+            fail([], $e->getError());
         }
         testNameModel::getInstance()->getOne(1);
-        dump(1);die;
+        dump(1);
+        die;
     }
 
     public function edit()
     {
 
-        dump(2);die;
+        dump(2);
+        die;
     }
 
     public function add()
     {
-        dump(3);die;
+        dump(3);
+        die;
     }
 }

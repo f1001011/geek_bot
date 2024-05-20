@@ -20,10 +20,23 @@ class BotRedSendService extends BaseService
         return true;
     }
 
-    public function verifyUser($tgUser){
-        //组装数据
-        //验证 hash
+    public function verifyUser($post,$tgUser){
+        if (!isset($post['encryption'])){
+            return false;
+        }
+        $encryption = $post['encryption'];
+        unset($post['encryption']);
 
+        foreach ($post as $key => $value) {
+            $data_check_arr[] = $key . '=' . $value;
+        }
+
+        sort($data_check_arr);
+        $data_check_string = implode("&", $data_check_arr);
+        $md5= md5($data_check_string);
+        if ($md5 != $encryption){
+            return false;
+        }
         $this->saveTelegramUserData($tgUser);
         return true;
     }

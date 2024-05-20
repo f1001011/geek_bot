@@ -33,5 +33,14 @@ Route::any('/botbot', ApiTelegramBotRedEnvelope::class.'/botbot');
 
 ###########################################################
 Route::any('/auth', \app\controller\ApiTelegramBotRedSend::class.'/verifyUser');//用户登录，信息获取
-Route::any('/send', \app\controller\ApiTelegramBotRedSend::class.'/send');//
+Route::any('/send', \app\controller\ApiTelegramBotRedSend::class.'/send'); //发送主菜单到群，需要填写群号
 Route::any('/set-create-send', \app\controller\ApiTelegramBotRedSend::class.'/userCreateSendBot')->middleware(\app\middleware\SignMiddleware::class);//用户创建  发起红包
+
+Route::group('log', function () {
+    Route::any('/get-json-user-log', \app\controller\ApiUserMoneyLog::class.'/joinUserLog');
+    Route::any('/get-json-log', \app\controller\ApiUserMoneyLog::class.'/joinLog');
+    Route::any('/get-balance-money', \app\controller\ApiUserMoneyLog::class.'/balanceInquiry');
+    Route::any('/get-balance-log', \app\controller\ApiUserMoneyLog::class.'/balanceLog');
+
+})->middleware(\app\middleware\SignMiddleware::class);//用户创建  发起红包;
+

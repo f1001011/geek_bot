@@ -26,11 +26,12 @@ class ApiTelegramBotRedSend extends ApiBase
     public function verifyUser()
     {
         $post = $_POST;
+        traceLog($_POST,'----post----verify---user----');
         if (empty($post['user'])) {
             fail([], '不是telegram来源');
         }
         $tgUser = json_decode($post['user'], true);
-        $isTelegram = BotRedSendService::getInstance()->verifyUser($tgUser);
+        $isTelegram = BotRedSendService::getInstance()->verifyUser($post,$tgUser);
         //获取是否注册了平台 和用户信息
         $userInfo = BotRedSendService::getInstance()->getUserInfo($tgUser['id']);
         success($userInfo);
