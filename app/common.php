@@ -57,7 +57,7 @@ function curlPost(string $url, array $post_data = [], $type = 'http_build_query'
     return $data;
 }
 
-function getRedEnvelopeOn(int $length = 20, $string = ''): string
+function getRedEnvelopeOn(int $length = 10, $string = ''): string
 {
     //随机字符集
     $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';

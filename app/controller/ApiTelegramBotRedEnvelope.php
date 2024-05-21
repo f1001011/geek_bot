@@ -72,12 +72,23 @@ class ApiTelegramBotRedEnvelope extends ApiBase
         $tgId = $data['from']['id'];//用户的tgId
         $tgUser = $data['from'];//用户信息
         traceLog(['message_id' => $messageId, 'crowd' => $crowd, 'command' => $command,], 'red-webhook-data');
-
+        $QueryId = $request['callback_query']['id'];
         //1 判断是否是红包领取命令   命令是否正确
         if (strpos($command, config('telegram.bot-binding-red-string-one')) !== false) {
-            BotCommonService::getInstance()->verifyRedType($command, $tgId, $request['callback_query']['id'], $request['callback_query']['from']);
+            BotCommonService::getInstance()->verifyRedType($command, $tgId, $QueryId, $request['callback_query']['from']);
             success();
         }
+        //判断是否是查询余额
+        if ($command == 'myBalance'){
+            BotRedSendService::getInstance()->getUserBalance($tgUser,$QueryId);
+            success();
+        }
+        //判断是否是查询余额
+        if ($command == 'myReportLog'){
+            BotRedSendService::getInstance()->getUserReportLog($tgUser,$QueryId);
+            success();
+        }
+
         //如果是接龙红包
         success();
     }
@@ -150,7 +161,7 @@ class ApiTelegramBotRedEnvelope extends ApiBase
             return ;
         }
         BotRedSendService::getInstance()->send($message['chat']['id']);
-
+         success();
     }
 
     public function test()

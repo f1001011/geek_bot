@@ -42,4 +42,19 @@ class LotteryJoinUserModel extends BaseModel
         return $this->where('lottery_id',$id)->sum('user_repay');
     }
 
+    //查询用户今日领取了多少红包。中雷多少钱
+    public function getUserMoneyAndRepay($map){
+       return $this->where($map)
+           ->cache(10)
+           ->field('user_id,tg_id,SUM(money) AS tmoney,SUM(user_repay) as rmoney')
+           ->whereDay('created_at')
+           ->group('tg_id')
+           ->find();
+    }
+
+    //查询指定红包的 红包 中雷
+    public function getToUserRepayMoney($ids){
+        return $this->whereIn('lottery_id',$ids)->sum('user_repay');
+    }
+
 }

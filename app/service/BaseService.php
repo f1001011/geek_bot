@@ -25,9 +25,9 @@ class BaseService
 
 
     //防止i重复点击
-    public function repeatPost($callbackQueryId = '')
+    public function repeatPost($callbackQueryId = '',$tgId = '')
     {
-        $ip = Request::ip();
+        $ip = !empty($tgId) ? $tgId : Request::ip();
         //防止重复请求
         $cache = Cache::get(sprintf(CacheKey::REDIS_TELEGRAM_RED_POST_IP, $ip));
         if (!$cache) {

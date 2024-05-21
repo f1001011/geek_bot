@@ -12,7 +12,7 @@ use think\facade\Cache;
 trait TelegramTrait
 {
     //管理员发送红包
-    public function sendRrdBotRoot(int $startNum = 0, int $endNum = 0, string $param = '', string $crowd = '', $mine = '',$status = false)
+    public function sendRrdBotRoot(int $startNum = 0, int $endNum = 0, string $param = '', string $crowd = '', $mine = '', $status = false)
     {
         $string = "($endNum/$startNum)";
         if ($startNum <= $endNum) {
@@ -23,13 +23,8 @@ trait TelegramTrait
             $string .= '💣 ' . $mine;
         }
 
-//        $loginUrl = [
-//            'url' => config('telegram.bot-binding-active-url-one') . '?crowd=' . $crowd, // 你的登录页面 URL
-//            'forward_text' => '登录成功', // 可选，用户登录成功后，你想让 bot 发送的消息文本
-//            'request_write_access' => true // 可选，请求写访问权限
-//        ];
-        if ($status){
-            $string .=language('yjs');
+        if ($status) {
+            $string .= language('yjs');
         }
 
         $one = [
@@ -45,59 +40,26 @@ trait TelegramTrait
     //主动发送 群红包消息
     public function sendRrdBot(string $crowd = '')
     {
-//        $loginUrl = [
-//            //'url' => config('telegram.bot-binding-active-url-one').'?crowd='.$crowd, // 你的登录页面 URL
-//            'url' => 'https://t.me/red_app_test_bot/myRedTestName?crowd=' . $crowd, // 你的登录页面 URL
-//            'forward_text' => '登录成功', // 可选，用户登录成功后，你想让 bot 发送的消息文本
-//            //'bot_username' => 'YourBotUsername', // 可选，你的 bot 的用户名
-//            'request_write_access' => true // 可选，请求写访问权限
-//        ];
 
-//        $one = [
-//            [
-//                ['text' => language('jrpt'), 'login_url' => $loginUrl]
-//            ],
-//        ];
         //合并两个数组
         return $this->menu();
     }
 
-//    public function myRedSend()
-//    {
-//        return [
-//            [
-//                //['text' => '我要发红包', 'url' => 'https://t.me/red_app_test_bot/myRedTestName'],
-//                ['text' => '我要发红包', 'url' => "https://t.me/get_red_bot"],
-//                ['text' => '主菜单', 'callback_data' => '/start']
-//            ]
-//        ];
-//    }
-
-    //用户点击 到和机器人主动聊天页面，主动发消息给用户让他发红包
-//    public function mySend(){
-//        // 1 跳转到用户页面
-//        return [
-//            [
-//
-//                ['text' => '我要发红包', 'url' => 'https://t.me/red_app_test_bot/myRedTestName'],
-//                ['text' => '主菜单', 'callback_data' => '/start']
-//            ]
-//        ];
-//    }
 
     protected function menu()
     {
         return [
             [
                 //['text' => '发送红包', 'url' => "https://t.me/$username"],
-                ['text' => '发送红包', 'url' => "https://t.me/red_app_test_bot/myRedTestName"],
-                ['text' => '游戏充值', 'url' => 'https://t.me/red_app_test_bot/myRedTestName?id=123321'],
-                ['text' => '提取奖金', 'url' => 'https://t.me/red_app_test_bot/myRedTestName?id=123321'],
+                ['text' => '发送红包', 'url' => config('telegram.bot-binding-active-url-in-one')],
+                ['text' => '今日报表', 'callback_data' => 'myReportLog'],
+                ['text' => '余额', 'callback_data' => 'myBalance'],
+                ['text' => '更多游戏', 'url' => config('telegram.bot-binding-game-url-one')],
             ],
             [
-                ['text' => '更多游戏', 'url' => 'https://t.me/red_app_test_bot/myRedTestName?id=123321'],
-                ['text' => '邀请好友', 'url' => 'https://t.me/red_app_test_bot/myRedTestName?id=123321'],
-                ['text' => '联系客服', 'url' => 'https://t.me/red_app_test_bot/myRedTestName?id=123321'],
+                ['text' => '游戏充值', 'url' => config('telegram.bot-binding-recharge-url-one')],
+                ['text' => '提取奖金', 'url' => config('telegram.bot-binding-carry-url-one')],
+                ['text' => '联系客服', 'url' => config('telegram.bot-binding-kefue-url-one')],
             ],
         ];
     }
@@ -142,7 +104,7 @@ trait TelegramTrait
         //1 获取用户发出的金额
         //2 获取用户赔了多少钱
         $centreMoney = LotteryJoinUserModel::getInstance()->getCountRepay($redId);
-        $centreString = language('flgzsordlendy',$centreMoney,$money,$centreMoney-$money);
+        $centreString = language('flgzsordlendy', $centreMoney, $money, $centreMoney - $money);
         //组装中奖人
         //获取中奖人名单
         //查询redis是否存在领取信息，不存在查询数据库
@@ -152,17 +114,17 @@ trait TelegramTrait
         if (!empty($userList)) {
             foreach ($userList as $Key => $value) {
                 $value = @json_decode($value, true);
-                $str.= language('flgzsordlendxq',$value['user_repay'] == 0 ? '💵':'💥',$value['money'],$value['user_name']);
+                $str .= language('flgzsordlendxq', $value['user_repay'] == 0 ? '💵' : '💥', $value['money'], $value['user_name']);
             }
-            return $string . $str .$centreString;
+            return $string . $str . $centreString;
         }
 
         //无 redis 信息时
         $userList = LotteryJoinUserModel::getInstance()->getDataList(['lottery_id' => $redId]);
         foreach ($userList as $Key => $value) {
-            $str.= language('flgzsordlendxq',$value['user_repay'] == 0 ? '💵':'💥',$value['money'],$value['user_name']);
+            $str .= language('flgzsordlendxq', $value['user_repay'] == 0 ? '💵' : '💥', $value['money'], $value['user_name']);
         }
-        return $string.$str .$centreString;
+        return $string . $str . $centreString;
     }
 
 

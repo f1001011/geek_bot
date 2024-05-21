@@ -34,7 +34,7 @@ class BotJieLongRedEnvelopeService extends BaseService
             'crowd' => $crowd,
             'user_id' => $userId,
             'status' => LotteryJoinModel::STATUS_HAVE,
-            'activity_on' => getRedEnvelopeOn(20, '-1'),
+            'activity_on' => getRedEnvelopeOn(10, '-1'),
             'money' => $money,
             'water_money' => $waterMoney,
             'join_num' => $joinNum,
@@ -173,7 +173,7 @@ class BotJieLongRedEnvelopeService extends BaseService
     //机器人消息体解析 $command 消息命令  $messageId 消息ID  $crowd群号 $tgId领取用户的tgId
     public function getRedBotAnalysis($redId, $tgId, $callbackQueryId, $tgUser = [])
     {
-        $this->repeatPost($callbackQueryId);//防止重复请求
+        $this->repeatPost($callbackQueryId,$tgId);//防止重复请求
         //验证用户信息是否存在 (平台是否有信息，可以直接注册和直接返回用户不存在)
         list($userInfo) = $this->verifyUserData($tgId, $tgUser);
         return $this->getRedEnvelopeUser($tgId, $redId, $callbackQueryId, $userInfo);
@@ -294,7 +294,7 @@ class BotJieLongRedEnvelopeService extends BaseService
     public function setEndQuery($data = []){
         //判断游戏类型
         $list = $this->sendRrdBotRoot($data['join_num'], $data['to_join_num'], $data['id'],$data['crowd'],'',true);
-        BotFacade::editMessageCaption($data['crowd'], $data['message_id'], '', $list);
+        BotFacade::editMessageCaption($data['crowd'], $data['message_id'], language('rendend',$data['user_name']), $list);
         return true;
     }
 }

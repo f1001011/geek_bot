@@ -71,7 +71,17 @@ class LotteryJoinModel extends BaseModel
     //获取创建 没发送出去的红包
     public function getCacheCreateInfoList(){
         $list = $this->where('status',LotteryJoinModel::STATUS_HAVE)->select()->toArray();
-        //
-        return$list;
+        return $list;
     }
+
+    //获取今日发红包金额
+    public function getDaySendRed($map,$field=''){
+       return $this->where($map)->whereDay('created_at')->cache(30)->sum($field);
+    }
+
+    //查询今天创建的红包ID列表
+    public function getRedListId($map){
+        return $this->where($map)->whereDay('created_at')->cache(30)->column('id');
+    }
+
 }

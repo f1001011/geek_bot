@@ -130,7 +130,7 @@ class BotRedMineService extends BaseService
     //机器人消息体解析 $command 消息命令  $messageId 消息ID  $crowd群号 $tgId领取用户的tgId
     public function getRedBotAnalysis($redId, $tgId, $callbackQueryId, $tgUser = [])
     {
-        $this->repeatPost($callbackQueryId);//防止重复请求
+        $this->repeatPost($callbackQueryId,$tgId);//防止重复请求
         //验证用户信息是否存在 (平台是否有信息，可以直接注册和直接返回用户不存在)
         list($userInfo) = $this->verifyUserData($tgId, $tgUser);
         return $this->getRedEnvelopeUser($tgId, $redId, $callbackQueryId, $userInfo);
@@ -239,7 +239,7 @@ class BotRedMineService extends BaseService
             $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate,$userMoney);
 
             //更新消息体
-            $str = $this->zdCopywriting($dataOne['username'], $amount);
+            $str = $this->zdCopywriting($amount, $dataOne['username']);
             if (isset($lotteryUpdate['status']) && $lotteryUpdate['status'] != 1){
                 $str = $this->zdCopywritingEdit($dataOne['money'],$redId,$dataOne['username'],$dataOne['red_password']);
             }
@@ -281,7 +281,7 @@ class BotRedMineService extends BaseService
     public function setEndQuery($data = []){
         //判断游戏类型
         $list = $this->sendRrdBotRoot($data['join_num'], $data['to_join_num'], $data['id'],$data['crowd'],$data['red_password'],true);
-        BotFacade::editMessageCaption($data['crowd'], $data['message_id'], '', $list);
+        BotFacade::editMessageCaption($data['crowd'], $data['message_id'], language('rendend',$data['user_name']), $list);
         return true;
     }
 }

@@ -17,29 +17,35 @@ class UserModel extends BaseModel
     }
 
     //获取用户信息时候保存到redis
-    public function getDataOne($map,$field = '*'){
-        $find =  $this->where($map)->field($field)->find();
-        if (empty($find)){
+    public function getDataOne($map, $field = '*')
+    {
+        $find = $this->where($map)->field($field)->find();
+        if (empty($find)) {
             return [];
         }
         $find = $find->toArray();
-       //用户数据存在生成 token
+        //用户数据存在生成 token
         //储存到 redis
         $redis = [
-            'tg_id'=>$find['tg_id'],
-            'id'=>$find['id'],
+            'tg_id' => $find['tg_id'],
+            'id' => $find['id'],
 //            'guid'=>$find['guid'],
 //            'nickname'=>$find['nickname'],
-            'username'=>$find['username'],
+            'username' => $find['username'],
 //            'status'=>$find['status'],
 //            'type'=>$find['type'],
-            'time'=>date('ymdHis'),
+            'time' => date('ymdHis'),
         ];
         $find['token'] = generateToken($redis);
-        if (!Cache::get(sprintf(CacheKey::REDIS_TG_USER_INFO,$find['tg_id']))){
-            Cache::set(sprintf(CacheKey::REDIS_TG_USER_INFO,$find['tg_id']),json_encode($find),CacheKey::REDIS_USER_INFO_TTL);
+        if (!Cache::get(sprintf(CacheKey::REDIS_TG_USER_INFO, $find['tg_id']))) {
+            Cache::set(sprintf(CacheKey::REDIS_TG_USER_INFO, $find['tg_id']), json_encode($find), CacheKey::REDIS_USER_INFO_TTL);
         }
         return $find;
+    }
+
+    public function getDataOneValue($map, $value)
+    {
+        return $this->where($map)->value($value);
     }
 
     public function incOrDec($id, $int)
@@ -56,7 +62,8 @@ class UserModel extends BaseModel
     }
 
     //$decBalance 用户余额需要减少多少，用户冻结多少金额
-    public function userFreezeRedBalance($id,$decBalance,$freezeBalance){
+    public function userFreezeRedBalance($id, $decBalance, $freezeBalance)
+    {
         //用户领取红包，冻结金额操作
     }
 }

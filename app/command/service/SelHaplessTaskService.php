@@ -44,22 +44,14 @@ class SelHaplessTaskService extends BaseService
         //7 选取完成，公布开奖信息，公布倒霉蛋， 倒霉蛋自动开始发送红包
         //倒霉蛋开始发送红包
         //没有倒霉蛋，说明都需要跟新数据
-//        if (empty($haplessUserList)) {
-//            if (!empty($ListUpdate)) {
-//                LotteryJoinModel::getInstance()->updateAll($ListUpdate);
-//                $output->writeln('selhaplesstask 没有倒霉蛋，跟新数据');
-//                return;
-//            }
-//            $output->writeln('selhaplesstask 没有倒霉蛋，没有更新的数据');
-//            return;
-//        }
+
         //没有倒霉蛋的直接更新
         if (!empty($setListUpdate)) {
             LotteryJoinModel::getInstance()->updateAll($ListUpdate);
         }
         if (empty($haplessUserList)){
             //LotteryJoinModel::getInstance()->updateAll($ListUpdate);
-            //$output->writeln('selhaplesstask 没有倒霉蛋，跟新数据');
+            //$output->writeln('selhaplesstask 没有倒霉蛋，更新数据');
         }
 
         //有倒霉蛋
@@ -97,7 +89,7 @@ class SelHaplessTaskService extends BaseService
                     'crowd' => $value['crowd'],
                     'user_id' => $haplessLotteryJoinUser['user_id'],
                     'status' => LotteryJoinModel::STATUS_HAVE,
-                    'activity_on' => getRedEnvelopeOn(20, "-{$value['jl_number']}"),
+                    'activity_on' => getRedEnvelopeOn(10, "-{$value['jl_number']}"),
                     'money' => $value['money'],
                     'water_money' => $value['water_money'],
                     'join_num' => $value['join_num'],
