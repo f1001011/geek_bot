@@ -294,7 +294,7 @@ class BotJieLongRedEnvelopeService extends BaseService
     public function setEndQuery($data = []){
         //判断游戏类型
         $list = $this->sendRrdBotRoot($data['join_num'], $data['to_join_num'], $data['id'],$data['crowd'],'',true);
-        BotFacade::editMessageCaption($data['crowd'], $data['message_id'], language('rendend',$data['user_name']), $list);
+        BotFacade::editMessageCaption($data['crowd'], $data['message_id'], language('rendend',$data['username']), $list);
         return true;
     }
 }

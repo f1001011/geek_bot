@@ -67,10 +67,10 @@ trait TelegramTrait
     //发起抢红包信息 telegram 展示
     public function copywriting($money = 0, $jsonUser = '', $username = '')
     {
-        $string = '🧧' . language('title-hb') . '🧧' . "\n" . language('flgzsorfl', "<b>$username</b>", "{$money}U");
+        $string = '🧧' . language('title-hb') . '🧧' . "\n" . language('flgzsorzs', "<b>$username</b>", "{$money}U");
         //是否固定了抢红包的人
         if (empty($jsonUser)) {
-            return $string;
+            return '🧧' . language('title-hb') . '🧧' . "\n" . language('flgzsorfl', "<b>$username</b>", "{$money}U");
         }
         $str = '';
         $jsonUser = explode(',', $jsonUser);
@@ -129,11 +129,20 @@ trait TelegramTrait
 
 
     //用户领取红包  发起抢红包信息 telegram 展示
-    public function queryPhotoEdit($money, $toMoney, $redId = 0, $username = '', $userInfo = [], $false = true)
+    public function queryPhotoEdit($data, $toMoney, $userInfo = [], $false = true)
     {
-        $string = '🧧' . language('title-hb') . '🧧' . "\n" . language('flgzsorfl', "<b>$username</b>", "{$money}U");
-        //$string = '🧧' . language('title-hb') . '🧧' . "\n" . '🕴<b>' . language('title-kf') . '</b>' . language('flg', "{$money}U") . "\n";
+        $money =$data['money'];
+        $username =$data['username'];
+        $redId = $data['id'];
+
+        $string = '🧧' . language('title-hb') . '🧧' . "\n";
         //是否固定了抢红包的人
+        if ($data['lottery_type'] == 1){
+            $string .=language('flgzsorzs', "<b>$username</b>", "{$money}U");
+        }else{
+            $string .=language('flgzsorfl', "<b>$username</b>", "{$money}U");
+        }
+
         $str = '';
         $date = date('H:i:s');
         //查询redis是否存在领取信息，不存在查询数据库
@@ -141,7 +150,7 @@ trait TelegramTrait
         //有redis 信息时
         if (!empty($userList)) {
             $str .= "🏆{$toMoney}U({$date}-{$userInfo['username']}" . language('yq') . ")\n";
-            language('flgzsorfl', "<b>$username</b>", "{$money}U");
+            //language('flgzsorfl', "<b>$username</b>", "{$money}U");
             foreach ($userList as $Key => $value) {
                 $value = @json_decode($value, true);
                 //如果不需要公布中奖名单

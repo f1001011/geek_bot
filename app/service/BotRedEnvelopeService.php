@@ -230,7 +230,7 @@ class BotRedEnvelopeService extends BaseService
             $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate);
 
             //更新消息体
-            BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'], $this->queryPhotoEdit($dataOne['money'], $amount, $redId,$dataOne['username'], $userInfo), $list);
+            BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'], $this->queryPhotoEdit($dataOne, $amount, $userInfo), $list);
             Db::commit();
         } catch (\Exception $e) {
             Db::rollback();
@@ -330,7 +330,7 @@ class BotRedEnvelopeService extends BaseService
     public function setEndQuery($data = []){
         //判断游戏类型
         $list = $this->sendRrdBotRoot($data['join_num'], $data['to_join_num'], $data['id'],$data['crowd'],'',true);
-        BotFacade::editMessageCaption($data['crowd'], $data['message_id'],language('rendend',$data['user_name']), $list);
+        BotFacade::editMessageCaption($data['crowd'], $data['message_id'],language('rendend',$data['username']), $list);
         return true;
     }
 }

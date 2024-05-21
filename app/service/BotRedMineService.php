@@ -203,7 +203,7 @@ class BotRedMineService extends BaseService
             'user_start_money' => $userInfo['balance'] ?? 0,
             'user_end_money' => $userInfo['balance'] + $amount - $depositMoney,
             'lottery_type' => $dataOne['lottery_type'],
-            'user_repay' => $depositMoney,
+            'user_repay' => $centre ? $depositMoney : 0,
         ];
 
         Db::startTrans();
@@ -226,7 +226,7 @@ class BotRedMineService extends BaseService
                 'water_money' => 0,
                 'to_source_id' => $joinUserId,
                 'source_id' => $redId,
-                'remarks' => '用户领取红包金额:' . $amount.',赔偿金额：'.$depositMoney.',实际变动索赔：'.($depositMoney-$amount),
+                'remarks' => '用户领取红包金额:' . $amount.',赔偿金额：'.($centre ? $depositMoney : 0).',实际变动索赔：'.($depositMoney-$amount),
                 'type' => 2,
                 'change_type' => $dataOne['lottery_type'],
                 'piping' => $dataOne['crowd'],
@@ -281,7 +281,7 @@ class BotRedMineService extends BaseService
     public function setEndQuery($data = []){
         //判断游戏类型
         $list = $this->sendRrdBotRoot($data['join_num'], $data['to_join_num'], $data['id'],$data['crowd'],$data['red_password'],true);
-        BotFacade::editMessageCaption($data['crowd'], $data['message_id'], language('rendend',$data['user_name']), $list);
+        BotFacade::editMessageCaption($data['crowd'], $data['message_id'], language('rendend',$data['username']), $list);
         return true;
     }
 }

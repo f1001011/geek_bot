@@ -3,6 +3,8 @@
 namespace app\controller;
 
 
+use app\command\service\RedAutoCloseService;
+use app\common\JobKey;
 use app\facade\BotFacade;
 use app\service\BotJieLongRedEnvelopeService;
 use app\service\BotRedSendService;
@@ -15,6 +17,9 @@ class Index extends ApiBase
 
     public function index()
     {
+        $status = RedAutoCloseService::getInstance()->getCacheStatus(JobKey::RED_AUTO_CLOSE);
+
+
         $json = '{"id":5814792502,"first_name":"doc","last_name":"i","username":"ohMyGodMagicIsDestory","language_code":"zh-hans","allows_write_to_pm":true}';
         $auth_data = [
             'chat_instance' => 7341815458717890001,
