@@ -112,7 +112,7 @@ class BotRedMineService extends BaseService
             //获取标签列表
             $list = $this->sendRrdBotRoot($redInfo['join_num'], 0, $redId,$redInfo['crowd'],$redInfo['red_password']);
             //发送消息到 telegram 开始抽奖
-            $res = BotFacade::sendPhoto($redInfo['crowd'], $photoUrl, $this->zdCopywriting($redInfo['money'],$redInfo['username']), $list);
+            $res = BotFacade::sendPhoto($redInfo['crowd'], $photoUrl, $this->zdCopywriting($redInfo['money'],$redInfo['username'],$redInfo), $list);
             if (!$res) {
                 traceLog($res, 'dx-fl-red-mine-curl-error');
                 throw new \think\exception\HttpException(404, 'curl 失败');
@@ -239,9 +239,9 @@ class BotRedMineService extends BaseService
             $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate,$userMoney);
 
             //更新消息体
-            $str = $this->zdCopywriting($amount, $dataOne['username']);
+            $str = $this->zdCopywriting($amount, $dataOne['username'],$dataOne);
             if (isset($lotteryUpdate['status']) && $lotteryUpdate['status'] != 1){
-                $str = $this->zdCopywritingEdit($dataOne['money'],$redId,$dataOne['username'],$dataOne['red_password']);
+                $str = $this->zdCopywritingEdit($dataOne);
             }
             //如果用户中雷了，给包主添加余额，给包主写日志
             if ($userMoney != 0){
@@ -281,7 +281,7 @@ class BotRedMineService extends BaseService
     public function setEndQuery($data = []){
         //判断游戏类型
         $list = $this->sendRrdBotRoot($data['join_num'], $data['to_join_num'], $data['id'],$data['crowd'],$data['red_password'],true);
-        BotFacade::editMessageCaption($data['crowd'], $data['message_id'], language('rendend',$data['username']), $list);
+        BotFacade::editMessageCaption($data['crowd'], $data['message_id'], language('rendend',$data['username'],$data['activity_on']), $list);
         return true;
     }
 }

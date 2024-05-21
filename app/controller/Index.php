@@ -17,7 +17,7 @@ class Index extends ApiBase
 
     public function index()
     {
-        $status = RedAutoCloseService::getInstance()->getCacheStatus(JobKey::RED_AUTO_CLOSE);
+        //$status = RedAutoCloseService::getInstance()->getCacheStatus(JobKey::RED_AUTO_CLOSE);
 
 
         $json = '{"id":5814792502,"first_name":"doc","last_name":"i","username":"ohMyGodMagicIsDestory","language_code":"zh-hans","allows_write_to_pm":true}';
@@ -58,7 +58,7 @@ class Index extends ApiBase
 
 
         die;
-        $str = BotJieLongRedEnvelopeService::getInstance()->jlCopywriting(100, '0.2', 5, '你好');
+//        $str = BotJieLongRedEnvelopeService::getInstance()->jlCopywriting(100, '0.2', 5, '你好');
         dump($str);
         die;
         $param = $this->request->only(['lang']);

@@ -65,12 +65,17 @@ trait TelegramTrait
     }
 
     //发起抢红包信息 telegram 展示
-    public function copywriting($money = 0, $jsonUser = '', $username = '')
+    public function copywriting($data)
     {
-        $string = '🧧' . language('title-hb') . '🧧' . "\n" . language('flgzsorzs', "<b>$username</b>", "{$money}U");
+        $money = $data['money'];
+        $jsonUser = $data['in_join_user'];
+        $username = $data['username'];
+        $on = $data['activity_on'];
+
+        $string = '🧧' . language('title-hb') . '🧧' . "\n" . language('flgzsorzs', "<b>$username</b>", "{$money}U", $on);
         //是否固定了抢红包的人
         if (empty($jsonUser)) {
-            return '🧧' . language('title-hb') . '🧧' . "\n" . language('flgzsorfl', "<b>$username</b>", "{$money}U");
+            return '🧧' . language('title-hb') . '🧧' . "\n" . language('flgzsorfl', "<b>$username</b>", "{$money}U", $on);
         }
         $str = '';
         $jsonUser = explode(',', $jsonUser);
@@ -78,7 +83,6 @@ trait TelegramTrait
         $userList = UserModel::getInstance()->whereIn('tg_id', $jsonUser)->select();
         foreach ($userList as $Key => $value) {
             $date = date('H:i:s');
-            //$str .= "🏆{$money}U({$date}-{$value['username']}" . language('klq') . ")\n";
             $str .= language('klq', $money, $date, $value['username']);
 
         }
@@ -86,19 +90,25 @@ trait TelegramTrait
     }
 
     //地雷红包发送文案
-    public function zdCopywriting($money = 0, $username = '')
+    public function zdCopywriting($money = 0, $username = '', $data = [])
     {
-        $string = '🧧' . language('title-hb') . '🧧' . "\n" . language('flgzsordl', "<b>$username</b>", "{$money}U");
+        $string = '🧧' . language('title-hb') . '🧧' . "\n" . language('flgzsordl', "<b>$username</b>", "{$money}U", $data['activity_on']);
         return $string;
     }
 
     //地雷红包用户完成过后文案 结束
-    public function zdCopywritingEdit($money = 0, $redId = 0, $username = '', $number = 0)
+    public function zdCopywritingEdit($data)
     {
+        $money = $data['money'];
+        $redId = $data['id'];
+        $username = $data['username'];
+        $on = $data['activity_on'];
+        $number = $data['red_password'];
+
         $string = '🧧' . language('title-hb') . '🧧' . "\n" . language('flgzsordlend',
                 "<b>$username</b>",
                 "{$money}U",
-                config('telegram.bot-binding-red-zd-rate'), $number
+                config('telegram.bot-binding-red-zd-rate'), $number,$on
             );
         //组装中奖盈亏
         //1 获取用户发出的金额
@@ -131,16 +141,17 @@ trait TelegramTrait
     //用户领取红包  发起抢红包信息 telegram 展示
     public function queryPhotoEdit($data, $toMoney, $userInfo = [], $false = true)
     {
-        $money =$data['money'];
-        $username =$data['username'];
+        $money = $data['money'];
+        $username = $data['username'];
         $redId = $data['id'];
+        $on = $data['activity_on'];
 
         $string = '🧧' . language('title-hb') . '🧧' . "\n";
         //是否固定了抢红包的人
-        if ($data['lottery_type'] == 1){
-            $string .=language('flgzsorzs', "<b>$username</b>", "{$money}U");
-        }else{
-            $string .=language('flgzsorfl', "<b>$username</b>", "{$money}U");
+        if ($data['lottery_type'] == 1) {
+            $string .= language('flgzsorzs', "<b>$username</b>", "{$money}U", $on);
+        } else {
+            $string .= language('flgzsorfl', "<b>$username</b>", "{$money}U", $on);
         }
 
         $str = '';
@@ -183,6 +194,7 @@ trait TelegramTrait
     }
 
     //接龙红包领取完开奖展示
+
     public function jlqueryPhotoEdit($money = 0, $waterL = 0, $num = 0, $toNum = 0, $username = '', $toMoney = 0, $redId = 0, $false = true)
     {
         $string = '🧧' . language('title-hb') . '🧧' . "\n";

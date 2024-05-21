@@ -118,7 +118,7 @@ class BotRedEnvelopeService extends BaseService
             //获取标签列表
             $list = $this->sendRrdBotRoot($redInfo['join_num'], 0, $redId,$redInfo['crowd']);
             //发送消息到 telegram 开始抽奖
-            $res = BotFacade::sendPhoto($redInfo['crowd'], $photoUrl, $this->copywriting($redInfo['money'], $redInfo['in_join_user'],$redInfo['username']), $list);
+            $res = BotFacade::sendPhoto($redInfo['crowd'], $photoUrl, $this->copywriting($redInfo), $list);
             if (!$res) {
                 traceLog($res, 'dx-fl-red-sendStartBotRoot-curl-error');
                 throw new \think\exception\HttpException(404, 'curl 失败');
@@ -330,7 +330,7 @@ class BotRedEnvelopeService extends BaseService
     public function setEndQuery($data = []){
         //判断游戏类型
         $list = $this->sendRrdBotRoot($data['join_num'], $data['to_join_num'], $data['id'],$data['crowd'],'',true);
-        BotFacade::editMessageCaption($data['crowd'], $data['message_id'],language('rendend',$data['username']), $list);
+        BotFacade::editMessageCaption($data['crowd'], $data['message_id'], language('rendend',$data['username'],$data['activity_on']), $list);
         return true;
     }
 }
