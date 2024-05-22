@@ -264,26 +264,34 @@ class BotJieLongRedEnvelopeService extends BaseService
 
             //2 执行修改用户钱包
             UserModel::getInstance()->dec($userInfo['id'], $yinMoney);
+
+            Db::commit();
+            $this->deleteLock($redId);
+
+            //是否需要发送信息时 用户领取了多少U 也显示
+            $false = $status == LotteryJoinModel::STATUS_END;
+            $false && $pid = Queue::later(2,CommandJob::class,['command_name'=>JobKey::SEL_HAPLESS_TASK],JobKey::JOB_NAME_COMMAND);
+
             //更新消息体 内联键盘
             $list = $this->sendRrdBotRoot($dataOne['join_num'], $lotteryUpdate['to_join_num'], $redId,$dataOne['crowd']);
             $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate);
 
-            //是否需要发送信息时 用户领取了多少U 也显示
-            $false = $status == LotteryJoinModel::STATUS_END;
+
 
             BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'],
                 $this->jlqueryPhotoEdit($dataOne['money'],
                     bcdiv($dataOne['water_money'], $dataOne['money'], 4),
                     $stopJoinNum . '/' . $dataOne['join_num'], $stopJoinNum,$dataOne['username'], $userInfo, $redId, $false), $list);
-            Db::commit();
+
+
         } catch (\Exception $e) {
             Db::rollback();
-            Cache::delete(sprintf(CacheKey::REDIS_TELEGRAM_RED_END, $redId));
+            //Cache::delete(sprintf(CacheKey::REDIS_TELEGRAM_RED_END, $redId));
             traceLog($e->getMessage(), "接龙用户抢红包 {$redId} 结算错误");
             //领取失败回调库存
             //$this->setCacheSendIncrNum($redId);
             //删除列表中刚加入的数据
-            $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate,0,true);
+            //$this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate,0,true);
             // 处理异常或返回错误
             return 0;
         }
@@ -291,8 +299,8 @@ class BotJieLongRedEnvelopeService extends BaseService
         //选完倒霉蛋之后，返回其他用户的押金  计划任务选取
         //用户领取信息写入
         $this->botRedStartSendOrUserEndData();//用户领取接龙红包信息更新redis ttl
-        $pid = '';
-        $false && $pid = Queue::later(2,CommandJob::class,['command_name'=>JobKey::SEL_HAPLESS_TASK],JobKey::JOB_NAME_COMMAND);
+
+
         traceLog('领取红包中...pid='.$pid,'queueId');
 
         return true;

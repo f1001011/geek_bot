@@ -13,9 +13,12 @@ class BotCommonService extends BaseService
 
     public function verifyRedType($command, $tgId, $callbackQueryId, $tgUser)
     {
+        $request = BaseService::getInstance()->tgRequestSend($command,$tgId);
+        if ($request){
+            return false;
+        }
 
         list($redId) = $this->disassembleCommand($command);
-
         if ($redId <= 0) {
             return false;
         }
@@ -25,6 +28,11 @@ class BotCommonService extends BaseService
         if (!$data) {
             return false;
         }
+        $RedisLockKey =  sprintf(CacheKey::REDIS_TG_LOCK_SETTLEMENT,$redId);
+        if (Cache::get($RedisLockKey)){
+            return false;
+        };
+        Cache::set($RedisLockKey,time(),10);
 
         //解析红包类型
         if ($data['lottery_type'] == LotteryJoinModel::RED_TYPE_FL || $data['lottery_type'] == LotteryJoinModel::RED_TYPE_DX) {
@@ -84,4 +92,5 @@ class BotCommonService extends BaseService
         }
         return true;
     }
+
 }

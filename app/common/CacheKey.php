@@ -2,7 +2,6 @@
 namespace app\common;
 class CacheKey{
     const REDIS_TG_LOCK_SETTLEMENT = 'redis_tg_lock:settlement:%s';//用户增在领取红包的时候，。防止其他人尽量操作影响数据。保证mysql的完整性
-
     const REDIS_TG_SEND_QUERY = 'redis_tg_send_query:md5:%s';//tg发送过来消息，如果是一样的，就不接受
     const REDIS_TG_USER_INFO = 'redis_tg_user_info:%s';//用户登录发红红包系统，获取用户信息 token
     const REDIS_USER_INFO_TTL = 60*60*3;//用户登录发红红包系统，获取用户信息 token
@@ -56,6 +55,14 @@ class CacheKey{
     const SEL_HAPLESS_TASK = 'selhaplesstask';//计划任务key
     const TTL = 5*60;//计划任务key
 
+
+    const REDIS_LIST_PARTICIPATE_USER  = 'redis_list:participate_user_list:%s';//参加的用户列表，用户的数据信息
+    const REDIS_LIST_LOTTERY_JOIN_SEND  = 'redis_list:lottery_join:end';//需要跑任务的列表
+
+    const REDIS_LIST_PARTICIPATE_USER_LOG  = 'redis_list:participate_user_list_log:%s';//参加的用户列表 数量由红包决定
+    const REDIS_LIST_INSERT_MONEY_LOG  = 'redis_list:insert_money_log:%s';//需要配插入的资金记录数据
+    const REDIS_LIST_UPDATE_LOTTERY_JOIN  = 'redis_list:update_lottery_join:%s';//需要修改的红包列表数据
+    const REDIS_LIST_INSERT_LOTTERY_JOIN_USER  = 'redis_list:insert_lottery_join_user:%s';//写入领奖信息
 
 
 

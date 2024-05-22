@@ -224,23 +224,27 @@ class BotRedEnvelopeService extends BaseService
                 'piping' => $dataOne['crowd'],
             ]);
             // 更多的数据库操作...
+            Db::commit();
+            $this->deleteLock($redId);
+
             //返回中奖金额
             //发送消息到 telegram 中奖消息  跟新中奖消息
             $list = $this->sendRrdBotRoot($dataOne['join_num'], $lotteryUpdate['to_join_num'], $redId,$dataOne['crowd']);
             $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate);
             //更新消息体
             BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'], $this->queryPhotoEdit($dataOne, $amount, $userInfo), $list);
-            Db::commit();
+            //Db::commit();
         } catch (\Exception $e) {
             Db::rollback();
-            Cache::delete(sprintf(CacheKey::REDIS_TELEGRAM_RED_END, $redId));
+            //Cache::delete(sprintf(CacheKey::REDIS_TELEGRAM_RED_END, $redId));
             traceLog($e->getMessage(), "福利-定向用户抢红包 {$redId} 结算错误");
             // 处理异常或返回错误
             //领取失败回调库存
             //$this->setCacheSendIncrNum($redId);
-            $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate,0,true);
+            //$this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate,0,true);
             return 0;
         }
+        //$this->deleteLock($redId);
         return $amount;
     }
 

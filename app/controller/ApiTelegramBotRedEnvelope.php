@@ -77,10 +77,6 @@ class ApiTelegramBotRedEnvelope extends ApiBase
         //1 判断是否是红包领取命令   命令是否正确
         if (strpos($command, config('telegram.bot-binding-red-string-one')) !== false) {
             //同一个用户请求过来的同一个命令，直接不允许进来
-            $request = BaseService::getInstance()->tgRequestSend($command,$tgId);
-            if ($request){
-                return false;
-            }
            $res = BotCommonService::getInstance()->verifyRedType($command, $tgId, $QueryId, $request['callback_query']['from']);
             $res ? success():fail();
         }

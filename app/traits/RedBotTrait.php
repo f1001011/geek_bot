@@ -136,9 +136,9 @@ trait RedBotTrait
             if (isset($lotteryUpdateData['status']) && $lotteryUpdateData['status'] != 1) {
                 Cache::set(sprintf(CacheKey::REDIS_TELEGRAM_RED_END, $redId), $redId, CacheKey::REDIS_TELEGRAM_RED_END_TTL);
             }
-        }else{
+        } else {
             //删除插入进去的值
-            if (Cache::sIsMember(sprintf(CacheKey::REDIS_TELEGRAM_RED_RECEIVE_USER, $redId),$json)){
+            if (Cache::sIsMember(sprintf(CacheKey::REDIS_TELEGRAM_RED_RECEIVE_USER, $redId), $json)) {
                 Cache::sRem(sprintf(CacheKey::REDIS_TELEGRAM_RED_RECEIVE_USER, $redId), $json);
             }
             //删除结束信息
@@ -200,4 +200,72 @@ trait RedBotTrait
     }
 
 
+    //写入领取的用户  这个队列数据不删除，以这个为标砖2，保证不会重复跑任务
+    public function setRedisUserList($redId, $tgId, $num, $true = false)
+    {
+        //判断队列是否存在该用户，不存在就写入。存在就直接返回
+        $key = sprintf(CacheKey::REDIS_LIST_PARTICIPATE_USER, $redId);
+
+        //用户已经加入集合
+        if (Cache::SISMEMBER($key, $tgId)) {
+            return false;
+        };
+
+        //如果任务写入失败，。删除刚才插入进去的数据
+        if ($true) {
+            Cache::SREM($key, $tgId);
+            return false;
+        }
+
+        //集合已经达到量
+        if (Cache::SCARD($key, $tgId) > $num) {
+            return false;
+        };
+
+        Cache::SADD($key, $tgId);//加入到集合
+        Cache::expire($key, 36000);
+        return true;
+    }
+
+    //跑任务的红包信息  挂任务一直跑
+    public function setRedisLotteryJoinList($redId){
+        $key = CacheKey::REDIS_LIST_LOTTERY_JOIN_SEND;
+        Cache::SADD($key, $redId);
+        return true;
+    }
+
+//    //写入用户领奖数据
+//    public function setRedisUserListLog($redId, $lotteryLog)
+//    {
+//        $key = sprintf(CacheKey::REDIS_LIST_PARTICIPATE_USER_LOG, $redId);
+//        Cache::LPUSH($key, $lotteryLog);
+//        Cache::expire($key, 36000);
+//        return true;
+//    }
+//
+//    //写入用户资金记录
+//    public function setRedisUserListMoneyLog($redId, $moneyLog)
+//    {
+//        $key = sprintf(CacheKey::REDIS_LIST_INSERT_MONEY_LOG, $redId);
+//        Cache::LPUSH($key, $moneyLog);//先进先出
+//        Cache::expire($key, 36000);
+//        return true;
+//    }
+//
+//    //写入红包数据修改
+//    public function setRedisLotteryListUpdate($redId, $lotteryUpdate)
+//    {
+//        $key = sprintf(CacheKey::REDIS_LIST_UPDATE_LOTTERY_JOIN, $redId);
+//        Cache::LPUSH($key, $lotteryUpdate);//先进先出
+//        Cache::expire($key, 36000);
+//        return true;
+//    }
+//
+//    public function setRedisLotteryListJoinUserInsert($redId, $insert)
+//    {
+//        $key = sprintf(CacheKey::REDIS_LIST_INSERT_LOTTERY_JOIN_USER, $redId);
+//        Cache::LPUSH($key, $insert);//先进先出
+//        Cache::expire($key, 36000);
+//        return true;
+//    }
 }
