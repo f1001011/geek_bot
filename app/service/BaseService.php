@@ -27,7 +27,7 @@ class BaseService
     //防止i重复点击
     public function repeatPost($callbackQueryId = '',$tgId = '')
     {
-        $ip = !empty($tgId) ? $tgId : Request::ip();
+        $ip = $tgId;
         //防止重复请求
         $cache = Cache::get(sprintf(CacheKey::REDIS_TELEGRAM_RED_POST_IP, $ip));
         if (!$cache) {
@@ -186,4 +186,40 @@ class BaseService
     }
 
 
+
+    //同一个用户发送过来的信息一样的，直接不进入程序，。防止高并发
+    public function tgRequestSend($command,$tgId){
+        $str = $command.'_'.$tgId;
+        if (Cache::get(sprintf(CacheKey::REDIS_TG_SEND_QUERY,$str))){
+            return true;
+        }
+        Cache::set(sprintf(CacheKey::REDIS_TG_SEND_QUERY,$str),time(),5);
+        return false;
+    }
+
+//
+//    //防止超卖
+//    public function setCacheSendNum($redId, $number)
+//    {
+//        Cache::set(sprintf(CacheKey::REDIS_RED_OVERSELLING, $redId), $number, CacheKey::REDIS_TELEGRAM_RED_RECEIVE_USER_TTL);
+//        return true;
+//    }
+//
+//    //防止超卖自减
+//    public function getCacheSendDecrNum($redId)
+//    {
+//        $result = Cache::get(sprintf(CacheKey::REDIS_RED_OVERSELLING, $redId));
+//        if ($result-1 >= 0) {
+//            Cache::DECR(sprintf(CacheKey::REDIS_RED_OVERSELLING, $redId));
+//            return true;
+//        }
+//        return false;
+//    }
+//
+//    //订单失败，回填数量
+//    public function setCacheSendIncrNum($redId)
+//    {
+//        Cache::INCR(sprintf(CacheKey::REDIS_RED_OVERSELLING, $redId));
+//        return true;
+//    }
 }

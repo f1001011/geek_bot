@@ -44,6 +44,11 @@ class BaseModel extends Model
         return $this->where($map)->field($field)->find();
     }
 
+    public function getDataLockOne($map, $field = '*')
+    {
+        return $this->where($map)->lock()->field($field)->find();
+    }
+
     public function setInsert($data)
     {
         $data['created_at'] = date('Y-m-d H:i:s');

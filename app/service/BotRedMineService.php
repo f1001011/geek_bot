@@ -269,8 +269,12 @@ class BotRedMineService extends BaseService
             Db::commit();
         } catch (\Exception $e) {
             Db::rollback();
+            Cache::delete(sprintf(CacheKey::REDIS_TELEGRAM_RED_END, $redId));
             traceLog($e->getMessage(), "福利-地雷 {$redId} 结算错误");
             // 处理异常或返回错误
+            $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate,$userMoney,true);
+            //领取失败回调库存
+            //$this->setCacheSendIncrNum($redId);
             return 0;
         }
         return $amount;

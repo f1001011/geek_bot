@@ -1,6 +1,9 @@
 <?php
 namespace app\common;
 class CacheKey{
+    const REDIS_TG_LOCK_SETTLEMENT = 'redis_tg_lock:settlement:%s';//用户增在领取红包的时候，。防止其他人尽量操作影响数据。保证mysql的完整性
+
+    const REDIS_TG_SEND_QUERY = 'redis_tg_send_query:md5:%s';//tg发送过来消息，如果是一样的，就不接受
     const REDIS_TG_USER_INFO = 'redis_tg_user_info:%s';//用户登录发红红包系统，获取用户信息 token
     const REDIS_USER_INFO_TTL = 60*60*3;//用户登录发红红包系统，获取用户信息 token
 
@@ -41,6 +44,8 @@ class CacheKey{
 
     //计划任务执行状态，在执行 停止 消息队列，消息队列在执行，停止计划任务执行
     const REDIS_RED_COMMAND_IS_STATUS = 'bot_telegram:command_status:%s';
+
+    const REDIS_RED_OVERSELLING = 'bot_telegram:overselling:%s';
 
 
 

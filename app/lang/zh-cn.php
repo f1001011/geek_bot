@@ -23,7 +23,7 @@ return [
     'jrpt'=>'进入平台',
     'yqg'=>'已抢光',
     'yjs'=>'已结束',
-    'yilingjiang' => '🏆<b>%s(%s-%s已抢！)</b>'."\n",
+    'yilingjiang' => '%s<b>%s(%s-%s已抢！)</b>'."\n",
     'tgjlhbwasend'=>'<b>%s</b>'.'发了%sU的接龙红包%s个,快来抢！'. "\n".'比例：%s' . "\n",
     'token-error'=>'token错误',
     'token-expire'=>'token过期',

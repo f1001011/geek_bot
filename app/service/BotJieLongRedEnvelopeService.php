@@ -2,6 +2,7 @@
 
 namespace app\service;
 
+use app\common\CacheKey;
 use app\common\JobKey;
 use app\facade\BotFacade;
 use app\model\LotteryJoinModel;
@@ -11,6 +12,7 @@ use app\model\UserModel;
 use app\queue\CommandJob;
 use app\traits\RedBotTrait;
 use app\traits\TelegramTrait;
+use think\facade\Cache;
 use think\facade\Db;
 use think\facade\Queue;
 
@@ -173,7 +175,7 @@ class BotJieLongRedEnvelopeService extends BaseService
     //机器人消息体解析 $command 消息命令  $messageId 消息ID  $crowd群号 $tgId领取用户的tgId
     public function getRedBotAnalysis($redId, $tgId, $callbackQueryId, $tgUser = [])
     {
-        $this->repeatPost($callbackQueryId,$tgId);//防止重复请求
+        //$this->repeatPost($callbackQueryId,$tgId);//防止重复请求
         //验证用户信息是否存在 (平台是否有信息，可以直接注册和直接返回用户不存在)
         list($userInfo) = $this->verifyUserData($tgId, $tgUser);
         return $this->getRedEnvelopeUser($tgId, $redId, $callbackQueryId, $userInfo);
@@ -272,11 +274,16 @@ class BotJieLongRedEnvelopeService extends BaseService
             BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'],
                 $this->jlqueryPhotoEdit($dataOne['money'],
                     bcdiv($dataOne['water_money'], $dataOne['money'], 4),
-                    $stopJoinNum . '/' . $dataOne['join_num'], $stopJoinNum,$dataOne['username'], $toMoney, $redId, $false), $list);
+                    $stopJoinNum . '/' . $dataOne['join_num'], $stopJoinNum,$dataOne['username'], $userInfo, $redId, $false), $list);
             Db::commit();
         } catch (\Exception $e) {
             Db::rollback();
+            Cache::delete(sprintf(CacheKey::REDIS_TELEGRAM_RED_END, $redId));
             traceLog($e->getMessage(), "接龙用户抢红包 {$redId} 结算错误");
+            //领取失败回调库存
+            //$this->setCacheSendIncrNum($redId);
+            //删除列表中刚加入的数据
+            $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate,0,true);
             // 处理异常或返回错误
             return 0;
         }

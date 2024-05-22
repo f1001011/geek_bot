@@ -125,14 +125,24 @@ trait RedBotTrait
     }
 
     //写入领取缓存和红包结束信息
-    protected function redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdateData,$userMoney = 0)
+    protected function redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdateData, $userMoney = 0, $delete = false)
     {
-        //写入已经领取的用户
-        Cache::SADD(sprintf(CacheKey::REDIS_TELEGRAM_RED_RECEIVE_USER, $redId), json_encode(['user_id' => $userInfo['id'], 'money' => $amount, 'user_name' => $userInfo['username'],'user_repay'=>$userMoney]));
-        Cache::expire(sprintf(CacheKey::REDIS_TELEGRAM_RED_RECEIVE_USER, $redId), CacheKey::REDIS_TELEGRAM_RED_RECEIVE_USER_TTL);
-        //写入抽奖结束信息
-        if (isset($lotteryUpdateData['status']) && $lotteryUpdateData['status'] != 1) {
-            Cache::set(sprintf(CacheKey::REDIS_TELEGRAM_RED_END, $redId), $redId, CacheKey::REDIS_TELEGRAM_RED_END_TTL);
+        $json = json_encode(['user_id' => $userInfo['id'], 'money' => $amount, 'user_name' => $userInfo['username'], 'user_repay' => $userMoney]);
+        if (!$delete) {
+            //写入已经领取的用户
+            Cache::SADD(sprintf(CacheKey::REDIS_TELEGRAM_RED_RECEIVE_USER, $redId), $json);
+            Cache::expire(sprintf(CacheKey::REDIS_TELEGRAM_RED_RECEIVE_USER, $redId), CacheKey::REDIS_TELEGRAM_RED_RECEIVE_USER_TTL);
+            //写入抽奖结束信息
+            if (isset($lotteryUpdateData['status']) && $lotteryUpdateData['status'] != 1) {
+                Cache::set(sprintf(CacheKey::REDIS_TELEGRAM_RED_END, $redId), $redId, CacheKey::REDIS_TELEGRAM_RED_END_TTL);
+            }
+        }else{
+            //删除插入进去的值
+            if (Cache::sIsMember(sprintf(CacheKey::REDIS_TELEGRAM_RED_RECEIVE_USER, $redId),$json)){
+                Cache::sRem(sprintf(CacheKey::REDIS_TELEGRAM_RED_RECEIVE_USER, $redId), $json);
+            }
+            //删除结束信息
+            Cache::delete(sprintf(CacheKey::REDIS_TELEGRAM_RED_END, $redId));
         }
         return true;
     }

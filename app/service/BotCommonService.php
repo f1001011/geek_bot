@@ -11,31 +11,32 @@ class BotCommonService extends BaseService
 {
 
 
-    public function verifyRedType($command,$tgId, $callbackQueryId, $tgUser)
+    public function verifyRedType($command, $tgId, $callbackQueryId, $tgUser)
     {
+
         list($redId) = $this->disassembleCommand($command);
 
-        if ($redId <=0){
-            return fail();
+        if ($redId <= 0) {
+            return false;
         }
 
         //获取房间信息，分配到指定 service
         $data = LotteryJoinModel::getInstance()->getCacheCreateInfo($redId);
-        if (!$data){
-            return fail();
+        if (!$data) {
+            return false;
         }
 
         //解析红包类型
-        if ($data['lottery_type'] == LotteryJoinModel::RED_TYPE_FL || $data['lottery_type'] == LotteryJoinModel::RED_TYPE_DX){
-            BotRedEnvelopeService::getInstance()->getRedBotAnalysis($redId, $tgId, $callbackQueryId, $tgUser);
+        if ($data['lottery_type'] == LotteryJoinModel::RED_TYPE_FL || $data['lottery_type'] == LotteryJoinModel::RED_TYPE_DX) {
+            return BotRedEnvelopeService::getInstance()->getRedBotAnalysis($redId, $tgId, $callbackQueryId, $tgUser);
         }
 
-        if ($data['lottery_type'] == LotteryJoinModel::RED_TYPE_JL){
-            BotJieLongRedEnvelopeService::getInstance()->getRedBotAnalysis($redId, $tgId, $callbackQueryId, $tgUser);
+        if ($data['lottery_type'] == LotteryJoinModel::RED_TYPE_JL) {
+            return BotJieLongRedEnvelopeService::getInstance()->getRedBotAnalysis($redId, $tgId, $callbackQueryId, $tgUser);
         }
 
-        if ($data['lottery_type'] == LotteryJoinModel::RED_TYPE_DL){
-            BotRedMineService::getInstance()->getRedBotAnalysis($redId, $tgId, $callbackQueryId, $tgUser);
+        if ($data['lottery_type'] == LotteryJoinModel::RED_TYPE_DL) {
+            return BotRedMineService::getInstance()->getRedBotAnalysis($redId, $tgId, $callbackQueryId, $tgUser);
         }
 
     }
@@ -65,22 +66,22 @@ class BotCommonService extends BaseService
         return [$redId];
     }
 
-    public function setQuery($data = []){
-        foreach ($data as $key=>$value){
+    public function setQuery($data = [])
+    {
+        foreach ($data as $key => $value) {
             //解析红包类型
-            if ($value['lottery_type'] == LotteryJoinModel::RED_TYPE_FL || $value['lottery_type'] == LotteryJoinModel::RED_TYPE_DX){
+            if ($value['lottery_type'] == LotteryJoinModel::RED_TYPE_FL || $value['lottery_type'] == LotteryJoinModel::RED_TYPE_DX) {
                 BotRedEnvelopeService::getInstance()->setEndQuery($value);
             }
 
-            if ($value['lottery_type'] == LotteryJoinModel::RED_TYPE_JL){
+            if ($value['lottery_type'] == LotteryJoinModel::RED_TYPE_JL) {
                 BotJieLongRedEnvelopeService::getInstance()->setEndQuery($value);
             }
 
-            if ($value['lottery_type'] == LotteryJoinModel::RED_TYPE_DL){
+            if ($value['lottery_type'] == LotteryJoinModel::RED_TYPE_DL) {
                 BotRedMineService::getInstance()->setEndQuery($value);
             }
         }
-       return true;
+        return true;
     }
-
 }
