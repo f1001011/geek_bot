@@ -156,7 +156,7 @@ function decryptToken($encodedToken, $secretKey = '')
         // 解码数据
         $data = json_decode($serializedData, true);
     } catch (Exception $e) {
-        fail([],language('sign error'));
+        fail([], language('sign error'));
     }
     return $data;
 }

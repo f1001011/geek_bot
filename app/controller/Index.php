@@ -17,6 +17,15 @@ class Index extends ApiBase
 
     public function index()
     {
+
+        $data=[
+          'bet'=>'W3sibW9uZXkiOjEwMCwidmFsdWUiOjExfV0',
+          'game_type'=>3,
+          'table_id'=>2,
+          'v'=>'807890841'
+        ];
+
+        die;
         //$status = RedAutoCloseService::getInstance()->getCacheStatus(JobKey::RED_AUTO_CLOSE);
 
 
