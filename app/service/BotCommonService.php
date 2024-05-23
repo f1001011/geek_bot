@@ -3,7 +3,6 @@
 namespace app\service;
 
 use app\common\CacheKey;
-use app\facade\BotFacade;
 use app\model\LotteryJoinModel;
 use think\facade\Cache;
 
