@@ -20,6 +20,12 @@ class Index extends ApiBase
 
     public function index()
     {
+        $input['message'] = 22222222222222222;
+        if (isset($input['message']['new_chat_member']) && !empty($newMessage = $input['message']['new_chat_member'])){
+            dump($newMessage);
+            die;
+        }
+        dump(111);die;
 
         //锁住本次操作
         $RedisLockKey =  'string_lock';

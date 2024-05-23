@@ -55,8 +55,12 @@ class ApiTelegramBotRedEnvelope extends ApiBase
 
         //判断是否是新消息。机器人加入房间消息
         $this->botCrowd($request);
+
         //判断是否是系统命令 比如 start
         $this->systemCommand($request);
+
+        //用户加入群
+        $this->addUserGroup($request);
 
         if (empty($request) || empty($request['callback_query']['message'])) {
             // 消息体错误
@@ -166,6 +170,14 @@ class ApiTelegramBotRedEnvelope extends ApiBase
          success();
     }
 
+    //用户加入群聊
+    public function addUserGroup($input){
+        if (isset($input['message']['new_chat_member']) && !empty($newMessage = $input['message']['new_chat_member']) && $input['message']['new_chat_member']['is_bot']){
+            //用户加入群
+            BotRedSendService::getInstance()->addUser($newMessage);
+        }
+        return true;
+    }
     public function test()
     {
         $command = 'robRed_163';//输入命令

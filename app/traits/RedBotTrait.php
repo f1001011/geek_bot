@@ -56,19 +56,24 @@ trait RedBotTrait
         //获取用户的数据表ID
         $userInfo = UserModel::getInstance()->getDataOne(['tg_id' => $tgId]);
         if (empty($userInfo)) {
-            $userInfo = [
-                'tg_id' => $tgId,
-                //'guid' => rand(9999, 99999) . rand(9999, 99999),
-                'player_name' => $tgUser['first_name'],
-                'nickname' => $tgUser['last_name'],
-                'username' => $tgUser['username'],
-                'balance' => 0,
-            ];
-            $userId = UserModel::getInstance()->setInsert($userInfo);
-            $userInfo['id'] = $userId;
+            $this->addUser($tgUser);
             return [$userInfo];
         }
         return [$userInfo];
+    }
+
+    public function addUser($tgUser){
+        $userInfo = [
+            'tg_id' => $tgUser['id'],
+            //'guid' => rand(9999, 99999) . rand(9999, 99999),
+            'player_name' => $tgUser['first_name'],
+            'nickname' => $tgUser['last_name'],
+            'username' => $tgUser['username'],
+            'balance' => 0,
+        ];
+        $userId = UserModel::getInstance()->setInsert($userInfo);
+        $userInfo['id'] = $userId;
+        return $userInfo;
     }
 
     //验证红包资格
