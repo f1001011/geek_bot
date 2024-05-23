@@ -11,6 +11,7 @@ use app\model\LotteryJoinUserModel;
 use app\model\MoneyLogModel;
 use app\model\UserModel;
 use app\queue\CommandJob;
+use app\queue\OpenLotteryJoinJob;
 use app\traits\RedBotTrait;
 use app\traits\TelegramTrait;
 use think\facade\Cache;
@@ -256,12 +257,12 @@ class BotRedMineService extends BaseService
             }
             // 更多的数据库操作...
             Db::commit();
-            $this->deleteLock($redId);
+            $this->deleteLock($redId);//删除锁
 
 
             //返回中奖金额
             //发送消息到 telegram 中奖消息  跟新中奖消息
-            //$list = $this->sendRrdBotRoot($dataOne['join_num'], $lotteryUpdate['to_join_num'], $redId,$dataOne['crowd']);
+
             $list = $this->sendRrdBotRoot($dataOne['join_num'], $lotteryUpdate['to_join_num'], $redId,$dataOne['crowd'],$dataOne['red_password']);
             $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate,$userMoney);
             //更新消息体
@@ -269,20 +270,17 @@ class BotRedMineService extends BaseService
             if (isset($lotteryUpdate['status']) && $lotteryUpdate['status'] != 1){
                 $str = $this->zdCopywritingEdit($dataOne);
             }
-            BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'], $str, $list);
 
-            //Db::commit();
+            //发送消息耗时。放队列
+            $data = ['dataOne'=>$dataOne,'str'=>$str,'list'=>$list];
+            //BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'], $str, $list);
+            Queue::later(2,OpenLotteryJoinJob::class,['command_name'=> JobKey::ZD_RED,$data],JobKey::JOB_NAME_OPEN);
+
         } catch (\Exception $e) {
             Db::rollback();
-            //Cache::delete(sprintf(CacheKey::REDIS_TELEGRAM_RED_END, $redId));
             traceLog($e->getMessage(), "福利-地雷 {$redId} 结算错误");
-            // 处理异常或返回错误
-           //  $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate,$userMoney,true);
-            //领取失败回调库存
-            //$this->setCacheSendIncrNum($redId);
             return 0;
         }
-       // $this->deleteLock($redId);
         return $amount;
     }
 

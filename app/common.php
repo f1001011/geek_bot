@@ -13,6 +13,16 @@ function fail(array $data = [], $message = 'message', int $code = 500)
     die;
 }
 
+function returnSuccess(array $data = [], $message = 'message', int $code = 200)
+{
+    return json_encode(['result' => $data, 'message' => $message, 'code' => $code]);
+}
+
+function returnFail(array $data = [], $message = 'message', int $code = 500)
+{
+    return json_encode(['result' => $data, 'message' => $message, 'code' => $code]);
+}
+
 function language(string $name = '', ...$values)
 {
     if (empty($values)) {

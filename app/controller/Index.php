@@ -4,12 +4,15 @@ namespace app\controller;
 
 
 use app\command\service\RedAutoCloseService;
+use app\common\CacheKey;
 use app\common\JobKey;
 use app\facade\BotFacade;
 use app\service\BotJieLongRedEnvelopeService;
 use app\service\BotRedSendService;
 use app\validate\CommonValidate;
+use think\Exception;
 use think\exception\ValidateException;
+use think\facade\Cache;
 
 
 class Index extends ApiBase
@@ -18,6 +21,29 @@ class Index extends ApiBase
     public function index()
     {
 
+        //锁住本次操作
+        $RedisLockKey =  'string_lock';
+        //$lock = Cache::get($RedisLockKey);
+       echo  date('H:i:s');
+       echo "\n";
+        do{
+            $lock = Cache::get($RedisLockKey);
+            if (!empty($lock)){
+                sleep(1);
+            }
+        }while($lock);
+        echo "\n";
+        echo  date('H:i:s');
+        Cache::set($RedisLockKey,time(),3);
+        dump(33333);
+        die;
+        try {
+        $this->edit();
+        }catch (Exception $e){
+
+            dump(2222222222222);
+        }
+        die;
         $data=[
           'bet'=>'W3sibW9uZXkiOjEwMCwidmFsdWUiOjExfV0',
           'game_type'=>3,

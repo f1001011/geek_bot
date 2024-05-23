@@ -11,6 +11,7 @@ use app\model\LotteryJoinUserModel;
 use app\model\MoneyLogModel;
 use app\model\UserModel;
 use app\queue\CommandJob;
+use app\queue\OpenLotteryJoinJob;
 use app\traits\RedBotTrait;
 use app\traits\TelegramTrait;
 use think\facade\Cache;
@@ -232,16 +233,13 @@ class BotRedEnvelopeService extends BaseService
             $list = $this->sendRrdBotRoot($dataOne['join_num'], $lotteryUpdate['to_join_num'], $redId,$dataOne['crowd']);
             $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate);
             //更新消息体
-            BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'], $this->queryPhotoEdit($dataOne, $amount, $userInfo), $list);
+            //BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'], $this->queryPhotoEdit($dataOne, $amount, $userInfo), $list);
+            $data = ['dataOne'=>$dataOne,'str'=>$this->queryPhotoEdit($dataOne, $amount, $userInfo),'list'=>$list];
+            Queue::later(2,OpenLotteryJoinJob::class,['command_name'=> JobKey::FL_RED,$data],JobKey::JOB_NAME_OPEN);
             //Db::commit();
         } catch (\Exception $e) {
             Db::rollback();
-            //Cache::delete(sprintf(CacheKey::REDIS_TELEGRAM_RED_END, $redId));
             traceLog($e->getMessage(), "福利-定向用户抢红包 {$redId} 结算错误");
-            // 处理异常或返回错误
-            //领取失败回调库存
-            //$this->setCacheSendIncrNum($redId);
-            //$this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate,0,true);
             return 0;
         }
         //$this->deleteLock($redId);

@@ -28,11 +28,23 @@ class BotCommonService extends BaseService
         if (!$data) {
             return false;
         }
+
+        //锁住本次操作 用户等待正在操作的用户使用完成，防止重复请求和高并发场景 有用户请求，但是没有反馈
         $RedisLockKey =  sprintf(CacheKey::REDIS_TG_LOCK_SETTLEMENT,$redId);
-        if (Cache::get($RedisLockKey)){
-            return false;
-        };
-        Cache::set($RedisLockKey,time(),10);
+        $lockLog['start'] = date('H:i:s');
+        do{
+            $lock = Cache::get($RedisLockKey);
+            if (!empty($lock)){
+                sleep(1);
+            }
+        }while($lock);
+        $lockLog['end'] = date('H:i:s');
+        $lockLog['key'] = $RedisLockKey;
+        $lockLog['tgId'] = $tgId;
+        traceLog(json_encode($lockLog));//写入日志
+        Cache::set($RedisLockKey,time(),CacheKey::REDIS_TG_LOCK_SETTLEMENT_TTL);//配置5秒
+        #########################
+
 
         //解析红包类型
         if ($data['lottery_type'] == LotteryJoinModel::RED_TYPE_FL || $data['lottery_type'] == LotteryJoinModel::RED_TYPE_DX) {
