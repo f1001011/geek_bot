@@ -237,7 +237,7 @@ class BotRedEnvelopeService extends BaseService
             $str = $this->queryPhotoEdit($dataOne, $amount, $userInfo);
             $data = ['command_name'=>JobKey::FL_RED,'dataOne'=>$dataOne,'str'=>$str,'list'=>$list];
             Cache::set(sprintf(CacheKey::QUERY_QUEUE_REDID,$dataOne['id']),$str);
-            Queue::later(5,OpenLotteryJoinJob::class,$data,JobKey::JOB_NAME_OPEN);
+            Queue::later(rand(5,10),OpenLotteryJoinJob::class,$data,JobKey::JOB_NAME_OPEN);
             //Db::commit();
         } catch (\Exception $e) {
             Db::rollback();

@@ -275,7 +275,7 @@ class BotRedMineService extends BaseService
             $data = ['dataOne'=>$dataOne,'str'=>$str,'list'=>$list,'command_name'=> JobKey::ZD_RED,];
 
             //BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'], $str, $list);
-            Queue::later(5,OpenLotteryJoinJob::class,$data,JobKey::JOB_NAME_OPEN);
+            Queue::later(rand(5,10),OpenLotteryJoinJob::class,$data,JobKey::JOB_NAME_OPEN);
 
         } catch (\Exception $e) {
             Db::rollback();

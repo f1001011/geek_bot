@@ -271,7 +271,7 @@ class BotJieLongRedEnvelopeService extends BaseService
 
             //是否需要发送信息时 用户领取了多少U 也显示
             $false = $status == LotteryJoinModel::STATUS_END;
-            $false && Queue::later(10,CommandJob::class,['command_name'=>JobKey::SEL_HAPLESS_TASK],JobKey::JOB_NAME_COMMAND);
+            $false && Queue::later(rand(10,12),CommandJob::class,['command_name'=>JobKey::SEL_HAPLESS_TASK],JobKey::JOB_NAME_COMMAND);
 
             //更新消息体 内联键盘
             $list = $this->sendRrdBotRoot($dataOne['join_nuKKm'], $stopJoinNum, $redId,$dataOne['crowd']);
@@ -281,7 +281,7 @@ class BotJieLongRedEnvelopeService extends BaseService
            //BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'],$str , $list);
             $data = ['command_name'=> JobKey::JL_RED,'dataOne'=>$dataOne,'str'=>$str,'list'=>$list];
             Cache::set(sprintf(CacheKey::QUERY_QUEUE_REDID,$dataOne['id']),$str);
-            Queue::later(5,OpenLotteryJoinJob::class,$data,JobKey::JOB_NAME_OPEN);
+            Queue::later(rand(5,10),OpenLotteryJoinJob::class,$data,JobKey::JOB_NAME_OPEN);
 
         } catch (\Exception $e) {
             Db::rollback();
