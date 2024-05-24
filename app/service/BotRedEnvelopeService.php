@@ -230,14 +230,17 @@ class BotRedEnvelopeService extends BaseService
 
             //返回中奖金额
             //发送消息到 telegram 中奖消息  跟新中奖消息
-            $list = $this->sendRrdBotRoot($dataOne['join_num'], $lotteryUpdate['to_join_num'], $redId,$dataOne['crowd']);
+            //$list = $this->sendRrdBotRoot($dataOne['join_num'], $lotteryUpdate['to_join_num'], $redId,$dataOne['crowd']);
+           // $str = $this->queryPhotoEdit($dataOne, $amount, $userInfo);
             $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate);
             //更新消息体
             //BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'], $this->queryPhotoEdit($dataOne, $amount, $userInfo), $list);
-            $str = $this->queryPhotoEdit($dataOne, $amount, $userInfo);
-            $data = ['command_name'=>JobKey::FL_RED,'dataOne'=>$dataOne,'str'=>$str,'list'=>$list];
-            Cache::set(sprintf(CacheKey::QUERY_QUEUE_REDID,$dataOne['id']),$str);
-            Queue::later(rand(5,10),OpenLotteryJoinJob::class,$data,JobKey::JOB_NAME_OPEN);
+            $data = ['command_name'=>JobKey::FL_RED,'dataOne'=>$dataOne];
+            //Cache::set(sprintf(CacheKey::QUERY_QUEUE_REDID,$dataOne['id']),$str,60*60);
+           // Cache::set(sprintf(CacheKey::QUERY_QUEUE_KEYBOARD_REDID,$dataOne['id']),json_encode($list),60*60);
+
+
+            Queue::later(5,OpenLotteryJoinJob::class,$data,JobKey::JOB_NAME_OPEN);
             //Db::commit();
         } catch (\Exception $e) {
             Db::rollback();

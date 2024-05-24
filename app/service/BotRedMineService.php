@@ -255,27 +255,28 @@ class BotRedMineService extends BaseService
                 ]);
                 UserModel::getInstance()->incOrDec($dataOne['user_id'], $depositMoney);
             }
+
             // 更多的数据库操作...
             Db::commit();
             $this->deleteLock($redId);//删除锁
-
+            $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate,$userMoney);
 
             //返回中奖金额
-            //发送消息到 telegram 中奖消息  跟新中奖消息
-
-            $list = $this->sendRrdBotRoot($dataOne['join_num'], $lotteryUpdate['to_join_num'], $redId,$dataOne['crowd'],$dataOne['red_password']);
-            $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate,$userMoney);
-            //更新消息体
-            $str = $this->zdCopywriting($amount, $dataOne['username'],$dataOne);
-            if (isset($lotteryUpdate['status']) && $lotteryUpdate['status'] != 1){
-                $str = $this->zdCopywritingEdit($dataOne);
-            }
-            Cache::set(sprintf(CacheKey::QUERY_QUEUE_REDID,$dataOne['id']),$str);
+//            //发送消息到 telegram 中奖消息  跟新中奖消息
+//            $list = $this->sendRrdBotRoot($dataOne['join_num'], $lotteryUpdate['to_join_num'], $redId,$dataOne['crowd'],$dataOne['red_password']);
+//            //更新消息体
+//            $str = $this->zdCopywriting($amount, $dataOne['username'],$dataOne);
+//            if (isset($lotteryUpdate['status']) && $lotteryUpdate['status'] != 1){
+//                $str = $this->zdCopywritingEdit($dataOne);
+//            }
+//            Cache::set(sprintf(CacheKey::QUERY_QUEUE_REDID,$dataOne['id']),$str,60*60);
+//            Cache::set(sprintf(CacheKey::QUERY_QUEUE_KEYBOARD_REDID,$dataOne['id']),json_encode($list),60*60);
             //发送消息耗时。放队列
-            $data = ['dataOne'=>$dataOne,'str'=>$str,'list'=>$list,'command_name'=> JobKey::ZD_RED,];
+            $data = ['dataOne'=>$dataOne,'command_name'=> JobKey::ZD_RED,];
+
 
             //BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'], $str, $list);
-            Queue::later(rand(5,10),OpenLotteryJoinJob::class,$data,JobKey::JOB_NAME_OPEN);
+            Queue::later(5,OpenLotteryJoinJob::class,$data,JobKey::JOB_NAME_OPEN);
 
         } catch (\Exception $e) {
             Db::rollback();

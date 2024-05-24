@@ -293,7 +293,7 @@ class TelegramBotBin extends BaseFacade
             traceLog(curl_error($ch), 'editMessageCaption error');
         }
         curl_close($ch);
-        traceLog($response, 'editMessageCaption');
+        traceLog([$response,$postFields], 'editMessageCaption');
         // 处理响应（如果需要）
         return $response;
     }

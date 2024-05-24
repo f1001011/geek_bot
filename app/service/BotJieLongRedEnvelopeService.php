@@ -271,17 +271,19 @@ class BotJieLongRedEnvelopeService extends BaseService
 
             //是否需要发送信息时 用户领取了多少U 也显示
             $false = $status == LotteryJoinModel::STATUS_END;
-            $false && Queue::later(rand(10,12),CommandJob::class,['command_name'=>JobKey::SEL_HAPLESS_TASK],JobKey::JOB_NAME_COMMAND);
+            $false && Queue::later(10,CommandJob::class,['command_name'=>JobKey::SEL_HAPLESS_TASK],JobKey::JOB_NAME_COMMAND);
 
             //更新消息体 内联键盘
-            $list = $this->sendRrdBotRoot($dataOne['join_nuKKm'], $stopJoinNum, $redId,$dataOne['crowd']);
+            //$list = $this->sendRrdBotRoot($dataOne['join_num'], $stopJoinNum, $redId,$dataOne['crowd']);
             $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate);
 
-            $str =  $this->jlqueryPhotoEdit($dataOne['money'],bcdiv($dataOne['water_money'], $dataOne['money'], 4),$stopJoinNum . '/' . $dataOne['join_num'], $stopJoinNum, $userInfo,$dataOne, $false);
-           //BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'],$str , $list);
-            $data = ['command_name'=> JobKey::JL_RED,'dataOne'=>$dataOne,'str'=>$str,'list'=>$list];
-            Cache::set(sprintf(CacheKey::QUERY_QUEUE_REDID,$dataOne['id']),$str);
-            Queue::later(rand(5,10),OpenLotteryJoinJob::class,$data,JobKey::JOB_NAME_OPEN);
+            //$str =  $this->jlqueryPhotoEdit($dataOne['money'],bcdiv($dataOne['water_money'], $dataOne['money'], 4),$stopJoinNum . '/' . $dataOne['join_num'], $stopJoinNum, $userInfo,$dataOne, $false);
+
+            //$data = ['command_name'=> JobKey::JL_RED,'dataOne'=>$dataOne,'str'=>$str,'list'=>$list,'isTrue'=>$false];
+            $data = ['command_name'=> JobKey::JL_RED,'dataOne'=>$dataOne,'isTrue'=>$false];
+//            Cache::set(sprintf(CacheKey::QUERY_QUEUE_REDID,$dataOne['id']),$str,60*60);
+//            Cache::set(sprintf(CacheKey::QUERY_QUEUE_KEYBOARD_REDID,$dataOne['id']),json_encode($list),60*60);
+            Queue::later(5,OpenLotteryJoinJob::class,$data,JobKey::JOB_NAME_OPEN);
 
         } catch (\Exception $e) {
             Db::rollback();

@@ -7,11 +7,14 @@ class CacheKey{
     const REDIS_TG_USER_INFO = 'redis_tg_user_info:%s';//用户登录发红红包系统，获取用户信息 token
     const REDIS_USER_INFO_TTL = 60*60*3;//用户登录发红红包系统，获取用户信息 token
     const QUERY_QUEUE_REDID = 'bot_telegram:query_queue_redID%s';//发送到飞机的消息
+    const QUERY_QUEUE_KEYBOARD_REDID = 'bot_telegram:query_queue_keyboard_redID%s';//发送的键盘
 
+    const QUERY_QUEUE_SEND_REDID = 'bot_telegram:query_queue_send_redID%s';
+    const QUERY_QUEUE_SEND_REDID_TTL = 3;
     const REDIS_TG_USER = 'redis_tg_user:%s';// 用户tg登录过来的信息
     const REDIS_TG_USER_TTL = 60*100;
     const  REDIS_RED_ID_CREATE_SENG_INFO = 'bot_telegram:create_send_info:%s';//redis创建信息。
-    const  REDIS_RED_ID_CREATE_SENG_INFO_TTL = 36000;
+    const  REDIS_RED_ID_CREATE_SENG_INFO_TTL = 16000;
 
     //领取红包防止同意IP重复请求
     const REDIS_TELEGRAM_RED_POST_IP = 'bot_telegram:rob_red_repeat:%s';

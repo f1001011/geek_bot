@@ -142,7 +142,7 @@ trait TelegramTrait
 
 
     //用户领取红包  发起抢红包信息 telegram 展示
-    public function queryPhotoEdit($data, $toMoney, $userInfo = [], $false = true)
+    public function queryPhotoEdit($data,$false = true)
     {
         $money = $data['money'];
         $username = $data['username'];
@@ -163,26 +163,26 @@ trait TelegramTrait
         $userList = Cache::SMEMBERS(sprintf(CacheKey::REDIS_TELEGRAM_RED_RECEIVE_USER, $redId));
         //有redis 信息时
         if (!empty($userList)) {
-            $str .= "🏆{$toMoney}U({$date}-{$userInfo['username']}" . language('yq') . ")\n"; //已抢
+            //$str .= "🏆{$toMoney}U({$date}-{$userInfo['username']}" . language('yq') . ")\n"; //已抢
             foreach ($userList as $Key => $value) {
                 $value = @json_decode($value, true);
                 //如果不需要公布中奖名单
-                $str = language('flyilingjiang', $false ? $value['money'] . 'U' : '', $date, $value['user_name']);
+                $str .= language('flyilingjiang', $value['money'] . 'U', $date, $value['user_name']);
             }
             return $string . $str;
         }
 
         //无 redis 信息时
         $userList = LotteryJoinUserModel::getInstance()->getDataList(['lottery_id' => $redId]);
-        if (empty($userList)) {
-            //用户不存在是。只展示当前的
-            //如果不需要公布中奖名单
-            $str = language('flyilingjiang', $false ? $toMoney . 'U' : '', $date, $userInfo['username']);
-            return $string . $str;
-        }
+//        if (empty($userList)) {
+//            //用户不存在是。只展示当前的
+//            //如果不需要公布中奖名单
+//            $str .= language('flyilingjiang', $false ? $toMoney . 'U' : '', $date, $userInfo['username']);
+//            return $string . $str;
+//        }
 
         foreach ($userList as $Key => $value) {
-            $str = language('flyilingjiang', $false ? $value['money'] . 'U' : '', $date, $value['user_name']);
+            $str .= language('flyilingjiang', $false ? $value['money'] . 'U' : '', $date, $value['user_name']);
         }
         return $string . $str;
     }
@@ -197,7 +197,8 @@ trait TelegramTrait
 
     //接龙红包领取完开奖展示
 
-    public function jlqueryPhotoEdit($money = 0, $waterL = 0, $num = 0, $toNum = 0,  $userInfo = [],$data=[], $false = true)
+//    public function jlqueryPhotoEdit($money = 0, $waterL = 0, $num = 0, $toNum = 0,  $userInfo = [],$data=[], $false = true)
+    public function jlqueryPhotoEdit($money = 0, $waterL = 0, $num = 0,$data=[], $false = true)
     {
         $redId = $data['id'];
         $username = $data['username'];
