@@ -234,8 +234,10 @@ class BotRedEnvelopeService extends BaseService
             $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate);
             //更新消息体
             //BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'], $this->queryPhotoEdit($dataOne, $amount, $userInfo), $list);
-            $data = ['dataOne'=>$dataOne,'str'=>$this->queryPhotoEdit($dataOne, $amount, $userInfo),'list'=>$list];
-            Queue::later(2,OpenLotteryJoinJob::class,['command_name'=> JobKey::FL_RED,$data],JobKey::JOB_NAME_OPEN);
+            $str = $this->queryPhotoEdit($dataOne, $amount, $userInfo);
+            $data = ['command_name'=>JobKey::FL_RED,'dataOne'=>$dataOne,'str'=>$str,'list'=>$list];
+            Cache::set(sprintf(CacheKey::QUERY_QUEUE_REDID,$dataOne['id']),$str);
+            Queue::later(5,OpenLotteryJoinJob::class,$data,JobKey::JOB_NAME_OPEN);
             //Db::commit();
         } catch (\Exception $e) {
             Db::rollback();

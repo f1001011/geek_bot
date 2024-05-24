@@ -192,7 +192,7 @@ trait RedBotTrait
                 return false;
             }
             //有查询次数的时候。获取查询了多少次，没达到次数，就不查询数据库
-            if ($num < 11) {
+            if ($num < 2) {
                 $num++;
                 Cache::SET($keyNumber, $num, CacheKey::REDIS_RED_ID_START_SENG_DATE_JL_TTL);
                 return false;

@@ -271,18 +271,17 @@ class BotJieLongRedEnvelopeService extends BaseService
 
             //是否需要发送信息时 用户领取了多少U 也显示
             $false = $status == LotteryJoinModel::STATUS_END;
-            $false && $pid = Queue::later(2,CommandJob::class,['command_name'=>JobKey::SEL_HAPLESS_TASK],JobKey::JOB_NAME_COMMAND);
+            $false && Queue::later(10,CommandJob::class,['command_name'=>JobKey::SEL_HAPLESS_TASK],JobKey::JOB_NAME_COMMAND);
 
             //更新消息体 内联键盘
-            $list = $this->sendRrdBotRoot($dataOne['join_num'], $lotteryUpdate['to_join_num'], $redId,$dataOne['crowd']);
+            $list = $this->sendRrdBotRoot($dataOne['join_num'], $stopJoinNum, $redId,$dataOne['crowd']);
             $this->redisCacheRedReceive($amount, $redId, $userInfo, $lotteryUpdate);
 
-
-
-            $str =  $this->jlqueryPhotoEdit($dataOne['money'],bcdiv($dataOne['water_money'], $dataOne['money'], 4),$stopJoinNum . '/' . $dataOne['join_num'], $stopJoinNum,$dataOne['username'], $userInfo, $redId, $false);
+            $str =  $this->jlqueryPhotoEdit($dataOne['money'],bcdiv($dataOne['water_money'], $dataOne['money'], 4),$stopJoinNum . '/' . $dataOne['join_num'], $stopJoinNum, $userInfo,$dataOne, $false);
            //BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'],$str , $list);
-            $data = ['dataOne'=>$dataOne,'str'=>$this->queryPhotoEdit($dataOne, $amount, $userInfo),'list'=>$list];
-            Queue::later(2,OpenLotteryJoinJob::class,['command_name'=> JobKey::JL_RED,$data],JobKey::JOB_NAME_OPEN);
+            $data = ['command_name'=> JobKey::JL_RED,'dataOne'=>$dataOne,'str'=>$str,'list'=>$list];
+            Cache::set(sprintf(CacheKey::QUERY_QUEUE_REDID,$dataOne['id']),$str);
+            Queue::later(5,OpenLotteryJoinJob::class,$data,JobKey::JOB_NAME_OPEN);
 
         } catch (\Exception $e) {
             Db::rollback();
@@ -295,8 +294,7 @@ class BotJieLongRedEnvelopeService extends BaseService
         //用户领取信息写入
         $this->botRedStartSendOrUserEndData();//用户领取接龙红包信息更新redis ttl
 
-
-        traceLog('领取红包中...pid='.$pid,'queueId');
+        traceLog('领取红包中...','queueId');
 
         return true;
     }

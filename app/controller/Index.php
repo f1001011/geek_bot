@@ -7,7 +7,10 @@ use app\command\service\RedAutoCloseService;
 use app\common\CacheKey;
 use app\common\JobKey;
 use app\facade\BotFacade;
+use app\model\LotteryJoinModel;
+use app\model\UserModel;
 use app\service\BotJieLongRedEnvelopeService;
+use app\service\BotRedEnvelopeService;
 use app\service\BotRedSendService;
 use app\validate\CommonValidate;
 use think\Exception;
@@ -20,6 +23,13 @@ class Index extends ApiBase
 
     public function index()
     {
+
+
+        $dataOne = LotteryJoinModel::getInstance()->getDataOne(['id'=>231]);
+        $amount = 100;
+        $userInfo = UserModel::getInstance()->getDataOne(['id'=>7]);
+        BotRedEnvelopeService::getInstance()->queryPhotoEdit($dataOne, $amount, $userInfo);
+dump(1);die;
         $input['message'] = 22222222222222222;
         if (isset($input['message']['new_chat_member']) && !empty($newMessage = $input['message']['new_chat_member'])){
             dump($newMessage);

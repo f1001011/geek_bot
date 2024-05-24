@@ -167,7 +167,7 @@ trait TelegramTrait
             foreach ($userList as $Key => $value) {
                 $value = @json_decode($value, true);
                 //如果不需要公布中奖名单
-                $str = language('yilingjiang', $false ? $value['money'] . 'U' : '', $date, $value['user_name']);
+                $str = language('flyilingjiang', $false ? $value['money'] . 'U' : '', $date, $value['user_name']);
             }
             return $string . $str;
         }
@@ -177,12 +177,12 @@ trait TelegramTrait
         if (empty($userList)) {
             //用户不存在是。只展示当前的
             //如果不需要公布中奖名单
-            $str = language('yilingjiang', $false ? $toMoney . 'U' : '', $date, $userInfo['username']);
+            $str = language('flyilingjiang', $false ? $toMoney . 'U' : '', $date, $userInfo['username']);
             return $string . $str;
         }
 
         foreach ($userList as $Key => $value) {
-            $str = language('yilingjiang', $false ? $value['money'] . 'U' : '', $date, $value['user_name']);
+            $str = language('flyilingjiang', $false ? $value['money'] . 'U' : '', $date, $value['user_name']);
         }
         return $string . $str;
     }
@@ -191,16 +191,20 @@ trait TelegramTrait
     public function jlCopywriting($money = 0, $waterL = 0, $num = '', $username = '', $redInfo = [])
     {
         $string = language('title-hbo');
-        $string .= language('tgjlhbwasend', $username, $money, $num, $waterL);
+        $string .= language('tgjlhbwasend', $username, $money, $num, $waterL,$redInfo['activity_on']);
         return $string;
     }
 
     //接龙红包领取完开奖展示
 
-    public function jlqueryPhotoEdit($money = 0, $waterL = 0, $num = 0, $toNum = 0, $username = '', $userInfo = [], $redId = 0, $false = true)
+    public function jlqueryPhotoEdit($money = 0, $waterL = 0, $num = 0, $toNum = 0,  $userInfo = [],$data=[], $false = true)
     {
+        $redId = $data['id'];
+        $username = $data['username'];
+
+
         $string = language('title-hbo');
-        $string .= language('tgjlhbwasend', $username, $money, $num, $waterL);
+        $string .= language('tgjlhbwasend', $username, $money, $num, $waterL,$data['activity_on']);
         $str = '';
         $date = date('H:i:s');
         //查询redis是否存在领取信息，不存在查询数据库

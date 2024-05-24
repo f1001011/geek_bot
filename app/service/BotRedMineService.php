@@ -270,11 +270,12 @@ class BotRedMineService extends BaseService
             if (isset($lotteryUpdate['status']) && $lotteryUpdate['status'] != 1){
                 $str = $this->zdCopywritingEdit($dataOne);
             }
-
+            Cache::set(sprintf(CacheKey::QUERY_QUEUE_REDID,$dataOne['id']),$str);
             //发送消息耗时。放队列
-            $data = ['dataOne'=>$dataOne,'str'=>$str,'list'=>$list];
+            $data = ['dataOne'=>$dataOne,'str'=>$str,'list'=>$list,'command_name'=> JobKey::ZD_RED,];
+
             //BotFacade::editMessageCaption($dataOne['crowd'], $dataOne['message_id'], $str, $list);
-            Queue::later(2,OpenLotteryJoinJob::class,['command_name'=> JobKey::ZD_RED,$data],JobKey::JOB_NAME_OPEN);
+            Queue::later(5,OpenLotteryJoinJob::class,$data,JobKey::JOB_NAME_OPEN);
 
         } catch (\Exception $e) {
             Db::rollback();

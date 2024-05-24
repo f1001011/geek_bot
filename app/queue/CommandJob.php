@@ -76,6 +76,7 @@ class CommandJob
                 }
                 break;
         }
+        sleep(1);
         return true;
     }
 

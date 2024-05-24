@@ -40,7 +40,7 @@ class BotCommonService extends BaseService
         $lockLog['end'] = date('H:i:s');
         $lockLog['key'] = $RedisLockKey;
         $lockLog['tgId'] = $tgId;
-        traceLog(json_encode($lockLog));//写入日志
+        traceLog(json_encode($lockLog),'用户等待中。。。');//写入日志
         Cache::set($RedisLockKey,time(),CacheKey::REDIS_TG_LOCK_SETTLEMENT_TTL);//配置5秒
         #########################
 
@@ -79,7 +79,7 @@ class BotCommonService extends BaseService
         $status = Cache::get(sprintf(CacheKey::REDIS_TELEGRAM_RED_END, $redId));
         if ($status) {
 //            BotService::SendCallbackQuery($callbackQueryId,'红包已抢光');
-            return fail([], '红包已经结束');
+            //return fail([], '红包已经结束');
         }
 
         return [$redId];

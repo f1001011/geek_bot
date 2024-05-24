@@ -6,6 +6,7 @@ class CacheKey{
     const REDIS_TG_SEND_QUERY = 'redis_tg_send_query:md5:%s';//tg发送过来消息，如果是一样的，就不接受
     const REDIS_TG_USER_INFO = 'redis_tg_user_info:%s';//用户登录发红红包系统，获取用户信息 token
     const REDIS_USER_INFO_TTL = 60*60*3;//用户登录发红红包系统，获取用户信息 token
+    const QUERY_QUEUE_REDID = 'bot_telegram:query_queue_redID%s';//发送到飞机的消息
 
     const REDIS_TG_USER = 'redis_tg_user:%s';// 用户tg登录过来的信息
     const REDIS_TG_USER_TTL = 60*100;
@@ -64,6 +65,8 @@ class CacheKey{
     const REDIS_LIST_INSERT_MONEY_LOG  = 'redis_list:insert_money_log:%s';//需要配插入的资金记录数据
     const REDIS_LIST_UPDATE_LOTTERY_JOIN  = 'redis_list:update_lottery_join:%s';//需要修改的红包列表数据
     const REDIS_LIST_INSERT_LOTTERY_JOIN_USER  = 'redis_list:insert_lottery_join_user:%s';//写入领奖信息
+
+
 
 
 
