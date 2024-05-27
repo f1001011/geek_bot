@@ -4,7 +4,7 @@ $BOT_TOKEN = env('bot.bot_key', '6367289736:AAHbQutLFr0DlEa9Ct3wuOr8ebDLpB8q6Jw'
 $BOT_CROWD = env('bot.bot_crowd', '-4199654142');
 return [
     'crowd'=>'-4199654142',//机器人群号
-    'bot-token'=>$BOT_CROWD,
+    'bot-token'=>$BOT_TOKEN,
     'bot-url'     => "https://api.telegram.org/bot$BOT_TOKEN/",
     'bot-binding-url-one'=>"https://redapi.tggame.vip/api/bot/webhook",//红包领取  机器人要改过
     'bot-binding-url-two'=>"https://redapi.tggame.vip/api/bot/webhook",//发红包机器人
