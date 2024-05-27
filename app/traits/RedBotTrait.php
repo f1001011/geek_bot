@@ -62,14 +62,15 @@ trait RedBotTrait
         return [$userInfo];
     }
 
-    public function addUser($tgUser){
+    public function addUser($tgUser)
+    {
         $userInfo = [
-            'tg_id' => $tgUser['id'],
+            'tg_id'       => $tgUser['id'],
             //'guid' => rand(9999, 99999) . rand(9999, 99999),
             'player_name' => $tgUser['first_name'],
-            'nickname' => $tgUser['last_name'],
-            'username' => $tgUser['username'],
-            'balance' => 0,
+            'nickname'    => $tgUser['last_name'],
+            'username'    => $tgUser['username'],
+            'balance'     => 0,
         ];
         $userId = UserModel::getInstance()->setInsert($userInfo);
         $userInfo['id'] = $userId;
@@ -233,7 +234,8 @@ trait RedBotTrait
     }
 
     //跑任务的红包信息  挂任务一直跑
-    public function setRedisLotteryJoinList($redId){
+    public function setRedisLotteryJoinList($redId)
+    {
         $key = CacheKey::REDIS_LIST_LOTTERY_JOIN_SEND;
         Cache::SADD($key, $redId);
         return true;

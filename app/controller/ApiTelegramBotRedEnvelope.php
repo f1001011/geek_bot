@@ -81,17 +81,17 @@ class ApiTelegramBotRedEnvelope extends ApiBase
         //1 判断是否是红包领取命令   命令是否正确
         if (strpos($command, config('telegram.bot-binding-red-string-one')) !== false) {
             //同一个用户请求过来的同一个命令，直接不允许进来
-           $res = BotCommonService::getInstance()->verifyRedType($command, $tgId, $QueryId, $request['callback_query']['from']);
-            $res ? success():fail();
+            $res = BotCommonService::getInstance()->verifyRedType($command, $tgId, $QueryId, $request['callback_query']['from']);
+            $res ? success() : fail();
         }
         //判断是否是查询余额
-        if ($command == 'myBalance'){
-            BotRedSendService::getInstance()->getUserBalance($tgUser,$QueryId);
+        if ($command == 'myBalance') {
+            BotRedSendService::getInstance()->getUserBalance($tgUser, $QueryId);
             success();
         }
         //判断是否是查询余额
-        if ($command == 'myReportLog'){
-            BotRedSendService::getInstance()->getUserReportLog($tgUser,$QueryId);
+        if ($command == 'myReportLog') {
+            BotRedSendService::getInstance()->getUserReportLog($tgUser, $QueryId);
             success();
         }
 
@@ -128,13 +128,13 @@ class ApiTelegramBotRedEnvelope extends ApiBase
             $message = $request['message'];
 
             $data = [
-                'title' => $message['chat']['title'],
-                'crowd_id' => $message['chat']['id'],
+                'title'      => $message['chat']['title'],
+                'crowd_id'   => $message['chat']['id'],
                 'first_name' => $message['new_chat_member']['first_name'],
-                'botname' => $message['new_chat_member']['username'],
-                'user_id' => $message['from']['id'],
-                'username' => $message['from']['username'],
-                'del' => 0,
+                'botname'    => $message['new_chat_member']['username'],
+                'user_id'    => $message['from']['id'],
+                'username'   => $message['from']['username'],
+                'del'        => 0,
             ];
 
             BotCrowdListService::getInstance()->botCrowdBind($data);
@@ -146,7 +146,7 @@ class ApiTelegramBotRedEnvelope extends ApiBase
 
             $data = [
                 'crowd_id' => $message['chat']['id'],
-                'botname' => $message['new_chat_member']['user']['username'],
+                'botname'  => $message['new_chat_member']['user']['username'],
             ];
             //修改这个条件
             BotCrowdListService::getInstance()->botCrowdEdit($data);
@@ -155,7 +155,8 @@ class ApiTelegramBotRedEnvelope extends ApiBase
         return true;
     }
 
-    public function systemCommand($request){
+    public function systemCommand($request)
+    {
 
         if (empty($request) || empty($request['message']['text'])) {
             // 消息体错误
@@ -163,21 +164,23 @@ class ApiTelegramBotRedEnvelope extends ApiBase
         }
         //如果是系统命令
         $message = $request['message'];
-        if (empty($message['chat']['id'])){
-            return ;
+        if (empty($message['chat']['id'])) {
+            return;
         }
         BotRedSendService::getInstance()->send($message['chat']['id']);
-         success();
+        success();
     }
 
     //用户加入群聊
-    public function addUserGroup($input){
-        if (isset($input['message']['new_chat_member']) && !empty($newMessage = $input['message']['new_chat_member']) && $input['message']['new_chat_member']['is_bot']){
+    public function addUserGroup($input)
+    {
+        if (isset($input['message']['new_chat_member']) && !empty($newMessage = $input['message']['new_chat_member']) && $input['message']['new_chat_member']['is_bot']) {
             //用户加入群
             BotRedSendService::getInstance()->addUser($newMessage);
         }
         return true;
     }
+
     public function test()
     {
         $command = 'robRed_163';//输入命令

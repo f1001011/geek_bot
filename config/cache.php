@@ -10,7 +10,7 @@ return [
 
     // 缓存连接方式配置
     'stores'  => [
-        'file' => [
+        'file'  => [
             // 驱动方式
             'type'       => 'File',
             // 缓存保存目录
@@ -25,18 +25,18 @@ return [
             'serialize'  => [],
         ],
         // 更多的缓存连接
-        'redis'   =>  [
+        'redis' => [
             // 驱动方式
-            'type'   => 'redis',
+            'type'       => 'redis',
             // 服务器地址
             'host'       => env('redis.redis_host', '127.0.0.1'),
-            'password'       => env('redis.redis_password', ''),
+            'password'   => env('redis.redis_password', ''),
             // 默认使用的数据库索引号
-            'select' => env('redis.redis_select', 3),
+            'select'     => env('redis.redis_select', 3),
             // 是否持久化连接
             'persistent' => false,
             // Redis连接的前缀，用于区分不同的应用
-            'prefix' => '',
+            'prefix'     => '',
         ],
     ],
 ];
