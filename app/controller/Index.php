@@ -23,6 +23,19 @@ class Index extends ApiBase
 
     public function index()
     {
+//        $new_balance = bcsub(1000, 10, 4);
+//        dump($new_balance);die;
+//        if ($type == 1) {
+//            $new_balance = bcadd(1000, 10, 4);
+//        } else {
+//            $new_balance = bcsub($new_balance, $amount, 4);
+//        }
+//
+//        $arr = new \stdClass();
+//        $arr->aaa = 123;
+//
+//        BotFacade::sendGame();
+
 //        $a= Cache::get(sprintf(CacheKey::QUERY_QUEUE_KEYBOARD_REDID,298));
 //
 //

@@ -57,8 +57,8 @@ class TelegramBotBin extends BaseFacade
 
         // 创建一个包含要发送的字段的数组
         $postFields = [
-            'chat_id'    => $chatId,
-            'photo'      => new \CURLFile($photoPath), // 使用 CURLFile 发送本地文件
+            'chat_id' => $chatId,
+            'photo' => new \CURLFile($photoPath), // 使用 CURLFile 发送本地文件
             'parse_mode' => 'HTML'
         ];
 
@@ -98,7 +98,7 @@ class TelegramBotBin extends BaseFacade
         if ($messageId > 0) {
             $deleteUrl = self::$url . "deleteMessage";
             $deleteData = [
-                'chat_id'    => $chatId,
+                'chat_id' => $chatId,
                 'message_id' => $messageId,
                 'parse_mode' => 'HTML'
             ];
@@ -119,7 +119,7 @@ class TelegramBotBin extends BaseFacade
         // 创建一个包含要发送的字段的数组
         $postFields = [
             'chat_id' => $chatId,
-            'photo'   => new \CURLFile($photoPath), // 使用 CURLFile 发送本地文件
+            'photo' => new \CURLFile($photoPath), // 使用 CURLFile 发送本地文件
         ];
 
         if (!empty($caption)) {
@@ -181,8 +181,8 @@ class TelegramBotBin extends BaseFacade
         // 将键盘编码为JSON
         // 准备 POST 数据
         $postData = array(
-            'chat_id'    => $chatId,
-            'text'       => $message,
+            'chat_id' => $chatId,
+            'text' => $message,
             'parse_mode' => 'HTML',
         );
 
@@ -215,9 +215,9 @@ class TelegramBotBin extends BaseFacade
         // 发送一个answerCallbackQuery响应来确认查询
         $answerCallbackQuery = [
             'callback_query_id' => $callbackQueryId,
-            'text'              => $message, // 这将作为Telegram客户端的提示显示（如果'show_alert'设置为true）
-            'show_alert'        => true, // 设置为true将在Telegram客户端中显示一个提示
-            'parse_mode'        => 'HTML'
+            'text' => $message, // 这将作为Telegram客户端的提示显示（如果'show_alert'设置为true）
+            'show_alert' => true, // 设置为true将在Telegram客户端中显示一个提示
+            'parse_mode' => 'HTML'
         ];
         $url = config('Telegram.bot-url') . "answerCallbackQuery";
         $ch = curl_init($url);
@@ -248,10 +248,10 @@ class TelegramBotBin extends BaseFacade
         // 发送一个空消息，只包含内联键盘
         $editMessageUrl = config('Telegram.bot-url') . "editMessageReplyMarkup";
         $postFields = [
-            'chat_id'      => $chatId,
-            'message_id'   => $messageId, // 注意：这里应该是新的message_id，因为你将发送一个新消息
+            'chat_id' => $chatId,
+            'message_id' => $messageId, // 注意：这里应该是新的message_id，因为你将发送一个新消息
             'reply_markup' => $encodedKeyboard,
-            'parse_mode'   => 'HTML'
+            'parse_mode' => 'HTML'
         ];
         $ch = curl_init($editMessageUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -273,7 +273,7 @@ class TelegramBotBin extends BaseFacade
         // 发送一个空消息，只包含内联键盘
         $editMessageUrl = self::$url . "editMessageCaption";
         $postFields = [
-            'chat_id'    => $chatId,
+            'chat_id' => $chatId,
             'message_id' => $messageId,
             'parse_mode' => 'HTML'
         ];
@@ -293,7 +293,7 @@ class TelegramBotBin extends BaseFacade
             traceLog(curl_error($ch), 'editMessageCaption error');
         }
         curl_close($ch);
-        traceLog([$response, $postFields], 'editMessageCaption');
+        traceLog([$response,$postFields], 'editMessageCaption');
         // 处理响应（如果需要）
         return $response;
     }
@@ -303,9 +303,9 @@ class TelegramBotBin extends BaseFacade
         // 发送一个空消息，只包含内联键盘
         $editMessageUrl = self::$url . "editMessageText";
         $postFields = [
-            'chat_id'    => $chatId,
+            'chat_id' => $chatId,
             'message_id' => $messageId,
-            'text'       => $message,
+            'text' => $message,
             'parse_mode' => 'HTML'
         ];
         if (!empty($keyboard)) {
